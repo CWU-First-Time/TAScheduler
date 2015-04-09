@@ -146,23 +146,7 @@ public class Scheduler {
 		courseQueue = new PriorityQueue<Course>(new CourseComparator());
 
 		Random random = new Random();
-		Quarter[] quarters = Quarter.values();
-		Student temp = new Student("Jimmy", "John", (20000000 + random.nextInt(100)), Quarter.FALL, 2099);
-		TreeMap<DayOfWeek, ArrayList<Integer>> time = new TreeMap<DayOfWeek, ArrayList<Integer>>();
-
-		ArrayList<Integer> hour = new ArrayList<Integer>();
-
-		for (int l = 0; l < 6; l++)
-			hour.add(random.nextInt(24));
-
-		for (int k = 0; k < days.length; k++) {
-
-			time.put(days[k], hour);
-		}
-
-		temp.setHoursAvailable(time);
-		students.add(temp);
-		
+		Quarter[] quarters = Quarter.values();	
 		
 		for (int i = 0; i < quarters.length; i++) {
 
