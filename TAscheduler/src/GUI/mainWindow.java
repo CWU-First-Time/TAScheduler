@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.FormText;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.swt.widgets.Combo;
 
 
 public class mainWindow {
@@ -24,6 +25,7 @@ public class mainWindow {
 	private Text text_2;
 	private Text text_3;
 	private final FormToolkit formToolkit = new FormToolkit(Display.getDefault());
+	private Text text_4;
 
 	/**
 	 * Launch the application.
@@ -129,6 +131,29 @@ public class mainWindow {
 		lblEmail.setAlignment(SWT.RIGHT);
 		lblEmail.setBounds(10, 97, 65, 15);
 		lblEmail.setText("E-mail:");
+		
+		Label lblNewLabel_3 = new Label(composite, SWT.NONE);
+		lblNewLabel_3.setAlignment(SWT.RIGHT);
+		lblNewLabel_3.setBounds(10, 124, 65, 15);
+		formToolkit.adapt(lblNewLabel_3, true, true);
+		lblNewLabel_3.setText("Graduation:");
+		
+		Combo combo = new Combo(composite, SWT.NONE);
+		combo.setItems(new String[] {"F", "W", "S", "Su"});
+		combo.setBounds(81, 121, 150, 23);
+		formToolkit.adapt(combo);
+		formToolkit.paintBordersFor(combo);
+		combo.setText("Select Quarter");
+		
+		Label lblNewLabel_4 = new Label(composite, SWT.NONE);
+		lblNewLabel_4.setAlignment(SWT.RIGHT);
+		lblNewLabel_4.setBounds(237, 124, 31, 15);
+		formToolkit.adapt(lblNewLabel_4, true, true);
+		lblNewLabel_4.setText("Year:");
+		
+		text_4 = new Text(composite, SWT.BORDER);
+		text_4.setBounds(274, 123, 76, 21);
+		formToolkit.adapt(text_4, true, true);
 		
 		TabItem tbtmInstructor = new TabItem(tabFolder, SWT.NONE);
 		tbtmInstructor.setText("Instructor");
