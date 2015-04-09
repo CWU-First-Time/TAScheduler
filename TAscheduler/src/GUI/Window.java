@@ -57,7 +57,7 @@ public class Window extends ApplicationWindow {
 	private Text idInput;
 	private Text emailInput;
 	private Text yearInput;
-	private Table table;
+	private Table scheduleTable;
 	
 	public static void main(String[] args) {
 		
@@ -125,87 +125,7 @@ public class Window extends ApplicationWindow {
 		studentTable.setHeaderVisible(true);
 		studentTable.setLinesVisible(true);
 		
-		TableItem[] items = studentTable.getItems();
-		
-		availabilityTable = new Table(composite_1, SWT.HIDE_SELECTION | SWT.NO_SCROLL);
-		availabilityTable.setBounds(10, 27, 501, 217);
-		availabilityTable.setHeaderVisible(true);
-		availabilityTable.setLinesVisible(true);
-		
-		
-		studentTable.addSelectionListener(new SelectionListener() {
-			
-		public void widgetDefaultSelected(SelectionEvent e) {
-				
-		}
-			
-		public void widgetSelected(SelectionEvent e) {
-				
-			
-			TableItem selected = studentTable.getSelection()[0];
-			Student student = tableMap.get(selected);
-			
-			DayOfWeek[] days = DayOfWeek.values();
-			TableItem[] items = availabilityTable.getItems();
-			
-			for (int i = 0; i < 5; i++) {
-				ArrayList<Integer> times = student.getHoursAvailable().get(days[i]);
-				for (int j = 0; j < 10; j++) {
-					if (times.contains(j+8)) 
-						items[j].setText(i+1, "YES");
-					
-					else
-						items[j].setText(i+1, "");
-	
-					}
-			}
-				
-			}
-		});
-		
-		
-		PriorityQueue<Student> studs = new PriorityQueue<Student>(scheduler.getStudents());
-		for (int i = 0; i < studs.size(); i++) {
-			
-			TableItem item = new TableItem(studentTable, SWT.NONE);
-
-		}
-		int nearestYear = studs.peek().getGradYear(); 
-		Quarter nearestQuarter = studs.peek().getGradQuarter();
-	
-		
-		
-		table = new Table(scheduleComposite, SWT.BORDER | SWT.FULL_SELECTION);
-		table.setHeaderVisible(true);
-		table.setBounds(10, 10, 605, 576);
-		table.setLinesVisible(true);
-		
-		TableColumn tblclmnQuarter = new TableColumn(table, SWT.NONE);
-		tblclmnQuarter.setText(scheduler.getStudents().peek().getGradQuarter().toString() + scheduler.getStudents().peek().getGradYear());
-		tblclmnQuarter.setWidth(100);
-		
-		TableColumn tblclmnMonday = new TableColumn(table, SWT.NONE);
-		tblclmnMonday.setWidth(100);
-		tblclmnMonday.setText("Monday");
-		
-		TableColumn tblclmnTuesday = new TableColumn(table, SWT.NONE);
-		tblclmnTuesday.setWidth(100);
-		tblclmnTuesday.setText("Tuesday");
-		
-		TableColumn tblclmnWednesday = new TableColumn(table, SWT.NONE);
-		tblclmnWednesday.setWidth(100);
-		tblclmnWednesday.setText("Wednesday");
-		
-		TableColumn tblclmnThursday = new TableColumn(table, SWT.NONE);
-		tblclmnThursday.setWidth(100);
-		tblclmnThursday.setText("Thursday");
-		
-		TableColumn tblclmnFriday = new TableColumn(table, SWT.NONE);
-		tblclmnFriday.setWidth(100);
-		tblclmnFriday.setText("Friday");
-		
-		
-	
+		//Student List Columns
 		TableColumn tblclmnStudentId = new TableColumn(studentTable, SWT.NONE);
 		tblclmnStudentId.setWidth(100);
 		tblclmnStudentId.setText("Last Name");
@@ -224,21 +144,26 @@ public class Window extends ApplicationWindow {
 		scrolledComposite.setContent(studentTable);
 		scrolledComposite.setMinSize(studentTable.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-	
-		
-		
-		DayOfWeek[] days = DayOfWeek.values();
-		
-		for (int i = 0; i < 10; i++) {
-
-			TableItem item = new TableItem(availabilityTable, SWT.NONE);
+		//Populates table with empty items
+		PriorityQueue<Student> studs = new PriorityQueue<Student>(scheduler.getStudents());
+		for (int i = 0; i < studs.size(); i++) {
+			
+			TableItem item = new TableItem(studentTable, SWT.NONE);
 
 		}
+		int nearestYear = studs.peek().getGradYear(); 
+		Quarter nearestQuarter = studs.peek().getGradQuarter();
 		
+		//Array of student items
+		TableItem[] items = studentTable.getItems();
 		
-		items = availabilityTable.getItems();
+		//Availability table showing available times for each selected student
+		availabilityTable = new Table(composite_1, SWT.HIDE_SELECTION | SWT.NO_SCROLL);
+		availabilityTable.setBounds(10, 27, 501, 217);
+		availabilityTable.setHeaderVisible(true);
+		availabilityTable.setLinesVisible(true);
 		
-		
+		//Adds students to the table and color codes them if they graduate within three quarters
 		for (int i = 0; i < items.length; i++) {
 					
 					Student stud = studs.remove();
@@ -255,11 +180,113 @@ public class Window extends ApplicationWindow {
 				items[i].setBackground(new Color(Display.getCurrent(), 100, 200, 255));
 		
 		}
+		
+		//Listener to update availability table for selected student
+		studentTable.addSelectionListener(new SelectionListener() {
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+					
+			}
+				
+			public void widgetSelected(SelectionEvent e) {
+					
+				
+				TableItem selected = studentTable.getSelection()[0];
+				Student student = tableMap.get(selected);
+				
+				DayOfWeek[] days = DayOfWeek.values();
+				TableItem[] items = availabilityTable.getItems();
+				
+				for (int i = 0; i < 5; i++) {
+					ArrayList<Integer> times = student.getHoursAvailable().get(days[i]);
+					for (int j = 0; j < 10; j++) {
+						if (times.contains(j+8)) 
+							items[j].setText(i+1, "YES");
+						
+						else
+							items[j].setText(i+1, "");
+		
+						}
+				}
+					
+				}
+		});
+		
+		
+		
 	
 		
+		//Schedule table
+		scheduleTable = new Table(scheduleComposite, SWT.BORDER | SWT.FULL_SELECTION);
+		scheduleTable.setHeaderVisible(true);
+		scheduleTable.setBounds(10, 10, 605, 576);
+		scheduleTable.setLinesVisible(true);
 		
+		//Schedule Table columns
+		TableColumn tblclmnQuarter = new TableColumn(scheduleTable, SWT.NONE);
+		tblclmnQuarter.setText(scheduler.getStudents().peek().getGradQuarter().toString() + scheduler.getStudents().peek().getGradYear());
+		tblclmnQuarter.setWidth(100);
+		
+		TableColumn tblclmnMonday = new TableColumn(scheduleTable, SWT.NONE);
+		tblclmnMonday.setWidth(100);
+		tblclmnMonday.setText("Monday");
+		
+		TableColumn tblclmnTuesday = new TableColumn(scheduleTable, SWT.NONE);
+		tblclmnTuesday.setWidth(100);
+		tblclmnTuesday.setText("Tuesday");
+		
+		TableColumn tblclmnWednesday = new TableColumn(scheduleTable, SWT.NONE);
+		tblclmnWednesday.setWidth(100);
+		tblclmnWednesday.setText("Wednesday");
+		
+		TableColumn tblclmnThursday = new TableColumn(scheduleTable, SWT.NONE);
+		tblclmnThursday.setWidth(100);
+		tblclmnThursday.setText("Thursday");
+		
+		TableColumn tblclmnFriday = new TableColumn(scheduleTable, SWT.NONE);
+		tblclmnFriday.setWidth(100);
+		tblclmnFriday.setText("Friday");
+		
+		TableItem tableItem = new TableItem(scheduleTable, SWT.NONE);
+		tableItem.setText("New TableItem");
+		
+		//Schedule table items
+	
+		
+		//Populates availabitiy table with empty items
+		DayOfWeek[] days = DayOfWeek.values();
+		
+		for (int i = 0; i < 10; i++) {
+
+			TableItem item = new TableItem(availabilityTable, SWT.NONE);
+
+		}
+		items = availabilityTable.getItems();
+		
+	
+	
+		
+		//Columns for availability table
 		TableColumn timeColumn = new TableColumn(availabilityTable, SWT.NONE);
 		timeColumn.setWidth(83);
+		
+		//Adds times for availability table
+		for (int i = 0; i < 10; i++) {
+			items[i].setText(0, i+8 + ":00");
+		}
+		
+		//Populates availability table
+		for (int i = 0; i < 5; i++) {
+
+			TableColumn column = new TableColumn(availabilityTable, SWT.NONE);
+			column.setText(days[i].toString());
+			column.setWidth(83);
+			
+			for (int j = 0; j < 10; j++) {
+				items[j].setText(i+1, "X");
+			}
+		}
+		
 		
 		Label lblName = new Label(composite, SWT.NONE);
 		lblName.setAlignment(SWT.RIGHT);
@@ -320,20 +347,6 @@ public class Window extends ApplicationWindow {
 		btnAddStudent.setBounds(628, 435, 123, 25);
 		btnAddStudent.setText("Add Student");
 		
-		for (int i = 0; i < 10; i++) {
-			items[i].setText(0, i+8 + ":00");
-		}
-		
-		for (int i = 0; i < 5; i++) {
-
-			TableColumn column = new TableColumn(availabilityTable, SWT.NONE);
-			column.setText(days[i].toString());
-			column.setWidth(83);
-			
-			for (int j = 0; j < 10; j++) {
-				items[j].setText(i+1, "X");
-			}
-		}
 
 		return container;
 	}
