@@ -31,6 +31,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.jface.action.Separator;
@@ -132,10 +134,10 @@ public class Window extends ApplicationWindow {
 					ArrayList<Integer> times = student.getHoursAvailable().get(days[i]);
 					for (int j = 0; j < 10; j++) {
 						if (times.contains(j+8)) 
-							items[j].setText(i+1, "YES");
+							items[j].setBackground(i+1, new Color(Display.getCurrent(), 0, 0, 0));
 						
 						else
-							items[j].setText(i+1, "");
+							items[j].setBackground(i+1, new Color(Display.getCurrent(), 255, 255, 255));
 
 					}
 				}
@@ -150,21 +152,54 @@ public class Window extends ApplicationWindow {
 
 		}
 		
-		TableColumn tblclmnStudentId = new TableColumn(studentTable, SWT.NONE);
-		tblclmnStudentId.setWidth(100);
-		tblclmnStudentId.setText("Last Name");
+		final TableColumn lastColumn = new TableColumn(studentTable, SWT.CHECK);
+		lastColumn.setWidth(100);
+		lastColumn.setText("Last Name");
 		
-		TableColumn tblclmnStudentId_1 = new TableColumn(studentTable, SWT.NONE);
-		tblclmnStudentId_1.setWidth(100);
-		tblclmnStudentId_1.setText("First Name");
+		final TableColumn firstColumn = new TableColumn(studentTable, SWT.NONE);
+		firstColumn.setWidth(100);
+		firstColumn.setText("First Name");
 		
-		TableColumn tblclmnStudentId_2 = new TableColumn(studentTable, SWT.NONE);
-		tblclmnStudentId_2.setWidth(100);
-		tblclmnStudentId_2.setText("Student ID");
+		final TableColumn idColumn = new TableColumn(studentTable, SWT.NONE);
+		idColumn.setWidth(100);
+		idColumn.setText("Student ID");
 		
-		TableColumn tblclmnGraduation = new TableColumn(studentTable, SWT.NONE);
-		tblclmnGraduation.setWidth(100);
-		tblclmnGraduation.setText("Graduation");
+		final TableColumn gradColumn = new TableColumn(studentTable, SWT.NONE);
+		gradColumn.setWidth(100);
+		gradColumn.setText("Graduation");
+		
+		Listener idSortListener = new Listener() {
+			public void handleEvent(Event e) {
+				
+				Comparator<TableItem> comparataur;
+				if ((TableColumn)e.widget == lastColumn)
+					comparataur = studentLastNameComparator;
+				
+				else if (((TableColumn)e.widget) == firstColumn)
+					comparataur = studentFirstNameComparator;
+				
+				else if (((TableColumn)e.widget) == idColumn)
+					comparataur = studentIDComparator;
+				
+				else
+					comparataur = studentGraduationComparator;
+					
+				PriorityQueue<TableItem> sortItems = new PriorityQueue<TableItem>(comparataur);
+				sortItems.addAll(tableMap.keySet());
+				studentTable.removeAll();
+				for (int i = 0; i < sortItems.size(); i++) {
+					TableItem item = new TableItem(studentTable, SWT.NONE);
+					item.setText(sortItems.remove().getText());
+				}
+				
+				studentTable.redraw();
+			}
+		};
+		lastColumn.addListener(SWT.Selection, idSortListener);
+		firstColumn.addListener(SWT.Selection, idSortListener);
+		idColumn.addListener(SWT.Selection, idSortListener);
+		gradColumn.addListener(SWT.Selection, idSortListener);
+		
 		scrolledComposite.setContent(studentTable);
 		scrolledComposite.setMinSize(studentTable.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -218,10 +253,7 @@ public class Window extends ApplicationWindow {
 			TableColumn column = new TableColumn(availabilityTable, SWT.NONE);
 			column.setText(days[i].toString());
 			column.setWidth(83);
-			
-			for (int j = 0; j < 10; j++) {
-				items[j].setText(i+1, "X");
-			}
+
 		}
 
 		return container;
@@ -305,6 +337,34 @@ public class Window extends ApplicationWindow {
 	protected Point getInitialSize() {
 		return new Point(450, 300);
 	}
+	
+	public final Comparator<TableItem> studentLastNameComparator  = new Comparator<TableItem>() {
+		
+		public int compare(TableItem s1, TableItem s2) {
+			return s2.getText(0).compareTo(s2.getText(0));
+		}
+	};
+	
+	public final Comparator<TableItem> studentFirstNameComparator  = new Comparator<TableItem>() {
+		
+		public int compare(TableItem s1, TableItem s2) {
+			return s1.getText(1).compareTo(s2.getText(1));
+		}
+	};
+	
+	public final Comparator<TableItem> studentIDComparator  = new Comparator<TableItem>() {
+		
+		public int compare(TableItem s1, TableItem s2) {
+			return s1.getText(2).compareTo(s2.getText(2));
+		}
+	};
+	
+	public final Comparator<TableItem> studentGraduationComparator  = new Comparator<TableItem>() {
+		
+		public int compare(TableItem s1, TableItem s2) {
+			return s1.getText(3).compareTo(s2.getText(3));
+		}
+	};
 	
 }
 
