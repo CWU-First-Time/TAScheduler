@@ -1,10 +1,10 @@
-package Objects;
+package objects;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import Objects.Course;
+import objects.Course;
 
 public class Student implements Comparable<Student> {
 

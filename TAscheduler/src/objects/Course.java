@@ -1,35 +1,40 @@
-package Objects;
+package objects;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Course implements Comparable<Course> {
 
-	private Map<DayOfWeek, ArrayList<Integer>> timeOffered;
+	private Map<DayOfWeek, Integer> timeOffered;
 	private int credits = 0;
 	private int maxTAcount = 0;
 	private int courseNumber;
-	private ArrayList<Instructor> instructors;
+	private int section;
+	private Instructor instructor;
 	
-	public Course(ArrayList<Instructor> inst, int suffix, int cred, Map<DayOfWeek, ArrayList<Integer>> times) {
+	public Course(Instructor inst, int sec, int courseNum, int cred) {
 		
-		instructors = inst;
+		instructor = inst;
 		credits = cred;
-		timeOffered = times;
-		courseNumber = suffix;
+		section = sec;
+		courseNumber = courseNum;
+		
+		timeOffered = new HashMap<DayOfWeek, Integer>();
 	}
 	
 	public String toString() {
 		
 		String string = "Class: CS " + courseNumber + "\n" +
-						"Taught by: " + instructors + "\n";
+						"Taught by: " + instructor + "\n";
 		
 		DayOfWeek[] days = DayOfWeek.values();
 		for (int i = 0; i < days.length; i++) {
 			string += days[i] + " times: "; 
-			for (int j = 0; j < timeOffered.get(days[i]).size(); j++)
-				string += timeOffered.get(days[i]).get(j) + ", ";
+			for (int j = 0; j < days.length; j++)
+				string += timeOffered.get(days[i]) + ", ";
 			string += "\n";
 		}
 		return string;
@@ -49,12 +54,12 @@ public class Course implements Comparable<Course> {
 		return courseNumber - c.getCourseNumber();
 	}
 
-	public Map<DayOfWeek, ArrayList<Integer>> getTimeOffered() {
+	public Map<DayOfWeek, Integer> getTimeOffered() {
 		
 		return timeOffered;
 	}
 
-	public void setTimeOffered(Map<DayOfWeek, ArrayList<Integer>> timeOffered) {
+	public void setTimeOffered(Map<DayOfWeek, Integer> timeOffered) {
 		
 		this.timeOffered = timeOffered;
 	}
@@ -89,13 +94,23 @@ public class Course implements Comparable<Course> {
 		this.courseNumber = courseNumber;
 	}
 
-	public ArrayList<Instructor> getInstructors() {
+	public Instructor getInstructor() {
 		
-		return instructors;
+		return instructor;
 	}
 
-	public void setInstructors(ArrayList<Instructor> instructors) {
+	public void setInstructor(Instructor instructor) {
 		
-		this.instructors = instructors;
+		this.instructor = instructor;
+	}
+
+	public int getSection() {
+		
+		return section;
+	}
+
+	public void setSection(int section) {
+		
+		this.section = section;
 	}
 }
