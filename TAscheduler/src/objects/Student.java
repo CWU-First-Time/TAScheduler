@@ -37,10 +37,25 @@ public class Student implements Comparable<Student> {
 		
 		else if (gradQuarter.getValue() != other.getGradQuarter().getValue())
 			return (gradQuarter.getValue() - other.getGradQuarter().getValue());
-		
-		else
+
+		else 
 			return studentID - other.getStudentID();
 	
+	}
+	
+	public boolean equals(Student other) {
+		System.out.println("Equal");
+		if (gradYear - other.getGradYear() != 0)
+			return false;
+		
+		else if (gradQuarter.getValue() != other.getGradQuarter().getValue())
+			return false;
+
+		else if (studentID - other.getStudentID() != 0)
+			return false;
+		
+		else 
+			return true;
 	}
 	
 	public String toString() {

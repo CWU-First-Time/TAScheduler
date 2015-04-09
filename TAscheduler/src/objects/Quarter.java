@@ -22,24 +22,37 @@ public enum Quarter {
 		return value;
 	}
 	
+	public static Quarter getQuarter(String str) {
+		if (str.equals("Winter"))
+			return WINTER;
+		else if (str.equals("Spring"))
+			return SPRING;
+		else if (str.equals("Summer"))
+			return SUMMER;
+		else if (str.equals("Fall"))
+			return FALL;
+		else
+			return null;
+	}
+	
 	public String toString() {
 		
 		switch (value) {
 		
 			case 0:
-				return "WINTER";
+				return "Winter";
 				
 			case 1:
-				return "SPRING";
+				return "Spring";
 				
 			case 2:
-				return "SUMMER";
+				return "Summer";
 				
 			case 3:
-				return "FALL";
+				return "Fall";
 				
 			default:
-				return null;
+				return "";
 				
 		}
 	}

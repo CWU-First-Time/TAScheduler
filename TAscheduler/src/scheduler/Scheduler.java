@@ -18,15 +18,15 @@ import objects.Student;
 
 public class Scheduler {
 
-	private static final int MAX_TA_HOURS = 1;
-	private static PriorityQueue<Student> students;
-	private static PriorityQueue<Course> courseQueue;
-	private static ArrayList<Course> classes;
-	private static Map<Course, PriorityQueue<Student>> possibleTAs;
-	private static Map<Student, ArrayList<Course>> possibleCourses;
-	private static DayOfWeek[] days = DayOfWeek.values();
+	private final int MAX_TA_HOURS = 1;
+	private PriorityQueue<Student> students;
+	private PriorityQueue<Course> courseQueue;
+	private ArrayList<Course> classes;
+	private Map<Course, PriorityQueue<Student>> possibleTAs;
+	private Map<Student, ArrayList<Course>> possibleCourses;
+	private DayOfWeek[] days = DayOfWeek.values();
 
-	public static ArrayList<Course> getPossibleCourses(Student stud) {
+	private ArrayList<Course> getPossibleCourses(Student stud) {
 
 		ArrayList<Course> classList = new ArrayList<Course>(classes);
 
@@ -48,7 +48,7 @@ public class Scheduler {
 		return classList;
 	}
 	
-	private static ArrayList<Student> schedule(Course c, int maxTAs, boolean preReq) {
+	public ArrayList<Student> schedule(Course c, int maxTAs, boolean preReq) {
 
 		ArrayList<Student> finalList = new ArrayList<Student>();
 		PriorityQueue<Student> studentsTaken = possibleTAs.get(c);
@@ -139,7 +139,7 @@ public class Scheduler {
 		return finalList;
 	}
 
-	public static void main(String[] args) {
+	public Scheduler() {
 
 		possibleCourses = new TreeMap<Student, ArrayList<Course>>();
 		students = new PriorityQueue<Student>();
@@ -147,6 +147,23 @@ public class Scheduler {
 
 		Random random = new Random();
 		Quarter[] quarters = Quarter.values();
+		Student temp = new Student("Jimmy", "John", (20000000 + random.nextInt(100)), Quarter.FALL, 2099);
+		TreeMap<DayOfWeek, ArrayList<Integer>> time = new TreeMap<DayOfWeek, ArrayList<Integer>>();
+
+		ArrayList<Integer> hour = new ArrayList<Integer>();
+
+		for (int l = 0; l < 6; l++)
+			hour.add(random.nextInt(24));
+
+		for (int k = 0; k < days.length; k++) {
+
+			time.put(days[k], hour);
+		}
+
+		temp.setHoursAvailable(time);
+		students.add(temp);
+		
+		
 		for (int i = 0; i < quarters.length; i++) {
 
 			for (int j = 0; j < 20; j++) {
@@ -203,7 +220,37 @@ public class Scheduler {
 
 	}
 	
-	private static class CourseComparator implements Comparator<Course> {
+	public LinkedList<Student> getStudents() {
+		
+		return new LinkedList<Student>(students);
+	}
+	
+	public ArrayList<Course> getCourses() {
+		
+		return classes;
+	}
+	
+	public boolean addStudent(Student stud) {
+		
+		return students.add(stud);
+	}
+	
+	public boolean addCourse(Course c) {
+		
+		return classes.add(c);
+	}
+	
+	public boolean removeStudent(Student stud) {
+		
+		return students.remove(stud);
+	}
+	
+	public boolean removeCourse(Course c) {
+		
+		return classes.remove(c);
+	}
+	
+ 	private class CourseComparator implements Comparator<Course> {
 
 		public int compare(Course c1, Course c2) {
 
