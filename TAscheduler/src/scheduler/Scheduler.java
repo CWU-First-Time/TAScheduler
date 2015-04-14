@@ -9,12 +9,15 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeMap;
 
-import objects.Course;
-import objects.Instructor;
-import objects.Quarter;
-import objects.Student;
+import model.Course;
+import model.Grade;
+import model.Instructor;
+import model.Quarter;
+import model.Student;
+
 
 public class Scheduler {
 
@@ -61,10 +64,10 @@ public class Scheduler {
 				while (!studentsTaken.isEmpty()) {
 				
 					Student next = studentsTaken.remove();
-					ArrayList<Course> taken = next.getClassesTaken();
+					Set<Course> taken = next.getClassesTaken().keySet();
 					
 					for (int i = 0; i < taken.size(); i++) {
-						if (taken.get(i).equals(c)) {
+						if (taken.contains(c)) {
 
 							possibleStuds.add(next);
 							break;
@@ -152,9 +155,21 @@ public class Scheduler {
 
 			for (int j = 0; j < 20; j++) {
 
-				Student student = new Student("Jimmy", "John", (20000000 + random.nextInt(100)), quarters[i], 2100);
+				char[] first = new char[random.nextInt(10) + 2];
+				for (int k = 0; k < first.length; k++) {
+					
+					first[k] = (char)(random.nextInt(26) + 97);
+				}
+				
+				char[] last = new char[random.nextInt(10) + 2];
+				for (int k = 0; k < last.length; k++) {
+					
+					last[k] = (char)(random.nextInt(26) + 97);
+				}
+				
+				Student student = new Student(new String(first), new String(last), (20000000 + random.nextInt(100)), quarters[i], 2100-random.nextInt(3), "Benjamin@Netanyahu.com");
 				TreeMap<DayOfWeek, ArrayList<Integer>> times = new TreeMap<DayOfWeek, ArrayList<Integer>>();
-
+				
 				ArrayList<Integer> hours = new ArrayList<Integer>();
 
 				for (int l = 0; l < 6; l++)
@@ -186,6 +201,32 @@ public class Scheduler {
 			stuff.setTimeOffered(times);
 			classes.add(stuff);
 		}
+		
+		LinkedList<Student> studse = new LinkedList<Student>(students);
+		
+		for (int i = 0; i < students.size(); i++) {
+			for (int j = 0; j < classes.size(); j++) {
+				Grade grade;
+				switch (random.nextInt(5)) {
+					case 0:
+						grade = Grade.A;
+						break;
+					case 1:
+						grade = Grade.B;
+						break;
+					case 2:
+						grade = Grade.C;
+						break;
+					case 3:
+						grade = Grade.D;
+						break;
+					default:
+						grade = Grade.F;
+						break;
+				}
+				studse.get(i).addCourse(classes.get(j), grade);
+			}
+		}
 
 		possibleTAs = new TreeMap<Course, PriorityQueue<Student>>();
 		for (int i = 0; i < classes.size(); i++)
@@ -198,10 +239,10 @@ public class Scheduler {
 
 		for (int i = 0; i < classes.size(); i++)
 			courseQueue.add(classes.get(i));
-		
+		/*
 		while (!courseQueue.isEmpty())
 			System.out.println("\nFor: " + courseQueue.peek() + "\n" + schedule(courseQueue.remove(), 4, false) + "\n\n");;
-
+	*/
 	}
 	
 	public LinkedList<Student> getStudents() {

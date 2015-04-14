@@ -1,31 +1,35 @@
-package objects;
+package model;
 
 import java.time.DayOfWeek;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import objects.Course;
+
+import model.Course;
 
 public class Student implements Comparable<Student> {
 
 	private Map<DayOfWeek, ArrayList<Integer>> hoursAvailable;
 	private String firstName;
 	private String lastName;
-	private ArrayList<Course> classesTaken;
+	private HashMap<Course, Grade> classesTaken;
 	private Quarter gradQuarter;
 	private int gradYear;
+	private String email;
 	private int studentID;
-	private int taHours = 0;
+	private int taHours = 0; // Hours that they have been scheduled for so far
 	
-	public Student(String first, String last, int id, Quarter gradQ, int gradY) {
+	public Student(String first, String last, int id, Quarter gradQ, int gradY, String email) {
 		
 		firstName = first;
 		lastName = last;
 		studentID = id;
 		gradQuarter = gradQ;
 		gradYear = gradY;
+		this.email = email;
 		
-		classesTaken = new ArrayList<Course>();
+		classesTaken = new HashMap<Course, Grade>();
 		hoursAvailable = new TreeMap<DayOfWeek, ArrayList<Integer>>();
 		
 	}
@@ -72,6 +76,21 @@ public class Student implements Comparable<Student> {
 		
 	}
 
+	public void addCourse(Course c, Grade grade) {
+	
+		classesTaken.put(c, grade);
+	}
+	
+	public void removeCourse(Course c) {
+		
+		classesTaken.remove(c);
+	}
+	
+	public Grade getGrade(Course c) {
+		
+		return classesTaken.get(c);
+	}
+	
 	public Map<DayOfWeek, ArrayList<Integer>> getHoursAvailable() {
 		
 		return hoursAvailable;
@@ -102,12 +121,12 @@ public class Student implements Comparable<Student> {
 		this.lastName = lastName;
 	}
 
-	public ArrayList<Course> getClassesTaken() {
+	public HashMap<Course, Grade> getClassesTaken() {
 		
 		return classesTaken;
 	}
 
-	public void setClassesTaken(ArrayList<Course> classesTaken) {
+	public void setClassesTaken(HashMap<Course, Grade>  classesTaken) {
 		
 		this.classesTaken = classesTaken;
 	}
@@ -148,6 +167,26 @@ public class Student implements Comparable<Student> {
 	}
 
 	public void setTAHours(int taHours) {
+		
+		this.taHours = taHours;
+	}
+
+	public String getEmail() {
+		
+		return email;
+	}
+
+	public void setEmail(String email) {
+		
+		this.email = email;
+	}
+
+	public int getTaHours() {
+		
+		return taHours;
+	}
+
+	public void setTaHours(int taHours) {
 		
 		this.taHours = taHours;
 	}

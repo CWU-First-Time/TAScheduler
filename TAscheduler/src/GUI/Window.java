@@ -4,26 +4,17 @@ import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Random;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
 
-import objects.Course;
-import objects.Instructor;
-import objects.Quarter;
-import objects.Student;
+import model.Quarter;
+import model.Student;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.StatusLineManager;
-import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -47,7 +38,7 @@ import scheduler.Scheduler;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.custom.SashForm;
 
 public class Window extends ApplicationWindow {
 	private Table studentTable;
@@ -100,7 +91,7 @@ public class Window extends ApplicationWindow {
 		
 		//Tab folder for composites
 		TabFolder tabFolder = new TabFolder(container, SWT.NONE);
-		tabFolder.setBounds(0, 0, 944, 632);
+		tabFolder.setBounds(0, 0, 1920, 1080);
 		
 		//Tab items
 		TabItem tbtmSchedule = new TabItem(tabFolder, SWT.NONE);
@@ -111,16 +102,21 @@ public class Window extends ApplicationWindow {
 		//Composites that go in the tabs
 		Composite scheduleComposite = new Composite(tabFolder, SWT.NONE);
 		tbtmSchedule.setControl(scheduleComposite);
-		Composite composite = new Composite(tabFolder, SWT.NONE);
+		ScrolledComposite composite = new ScrolledComposite(tabFolder, SWT.NONE);
 		studentTab.setControl(composite);
-		composite.setBounds(0, 24, 944, 583);
 		
-		ScrolledComposite scrolledComposite = new ScrolledComposite(composite, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		SashForm sashForm = new SashForm(tabFolder, SWT.NONE);
+		studentTab.setControl(sashForm);
+		composite.setBounds(0, 0, 944, 583);
+		
+		// The scroll composite to hold the student table
+		ScrolledComposite scrolledComposite = new ScrolledComposite(sashForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolledComposite.setBounds(0, 0, 425, 583);
 		scrolledComposite.setExpandHorizontal(true);
 		scrolledComposite.setExpandVertical(true);
 		
-		studentTable = new Table(scrolledComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.NO_SCROLL);
+		// Craete student table
+		studentTable = new Table(scrolledComposite, SWT.BORDER | SWT.FULL_SELECTION);
 		studentTable.setHeaderVisible(true);
 		studentTable.setLinesVisible(true);
 		
@@ -161,7 +157,7 @@ public class Window extends ApplicationWindow {
 			}
 		});
 		
-		//Populates table with empty items
+		//Populates student table with empty items
 		PriorityQueue<Student> studs = new PriorityQueue<Student>(scheduler.getStudents());
 		for (int i = 0; i < studs.size(); i++) {
 			
@@ -174,7 +170,6 @@ public class Window extends ApplicationWindow {
 		lastColumn.setWidth(100);
 		lastColumn.setText("Last Name");
 
-		
 		final TableColumn firstColumn = new TableColumn(studentTable, SWT.NONE);
 		firstColumn.setWidth(100);
 		firstColumn.setText("First Name");
@@ -190,6 +185,7 @@ public class Window extends ApplicationWindow {
 		final int nearestYear = studs.peek().getGradYear(); 
 		final Quarter nearestQuarter = studs.peek().getGradQuarter();
 		
+		// Listener for student columns
 		Listener idSortListener = new Listener() {
 			public void handleEvent(Event e) {
 				
@@ -248,7 +244,6 @@ public class Window extends ApplicationWindow {
 		gradColumn.addListener(SWT.Selection, idSortListener);
 		
 		scrolledComposite.setContent(studentTable);
-		scrolledComposite.setMinSize(studentTable.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		//Array of student items
 		TableItem[] items = studentTable.getItems();
@@ -466,6 +461,7 @@ public class Window extends ApplicationWindow {
 	}
 
 	
+	// Comparators used for sorting the students in the student table
 	public final Comparator<TableItem> studentLastNameComparator  = new Comparator<TableItem>() {
 		@Override
 		public int compare(TableItem s1, TableItem s2) {
