@@ -30,6 +30,8 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -52,10 +54,12 @@ import scheduler.Scheduler;
 import org.eclipse.swt.widgets.Button;
 
 import GUI.student.StudentWindow;
+import GUI.schedule.*;
 
 public class FirstWindow extends ApplicationWindow {
 
 	private StudentWindow studentWindow;
+	private schedule scheduleWindow;
 	
 	/**
 	 * Create the application window.
@@ -93,6 +97,15 @@ public class FirstWindow extends ApplicationWindow {
 
 		TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
 		tbtmNewItem.setText("New Item");
+		
+		Composite comp = new Composite(tabFolder, SWT.NONE);
+		tbtmNewItem.setControl(comp);
+		//comp.setLayout(new RowLayout());
+		Point pt = tabFolder.getSize();
+		System.out.println("tab size: " + pt.x);
+		
+		scheduleWindow = new schedule(comp);
+		
 
 		return container;
 	}
