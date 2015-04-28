@@ -16,9 +16,13 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.FontMetrics;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -37,19 +41,38 @@ import org.eclipse.swt.widgets.Text;
 
 public class schedule {
 	
-	private Table tableSetup;
-	TableEditor editor;
+	//private Table tableSetup;
+	//TableEditor editor;
 	private String header[] = {"QuarterYear", "Monday", "Tuesday", "Wednesday",
 						"Thursday", "Friday"};
 	
-	private List<String[]> contentsList;
+	private List<String> contentsList;
+	private Text scheduleCells[];
+	
+	//Total of 144 cells
 	int SCHEDULE_COLUMNS = 6;
-	int SCHEDULE_ROWS =24; 
+	int SCHEDULE_ROWS =24;
+	
 	int ROW_SELECTED = 0;
 	int COLUMN_SELECTED = 1;
 	
 	public schedule(Composite comp)
 	{
+		//GridLayout
+		GridLayout layout = new GridLayout();
+		
+		//Layout has six columns
+		layout.numColumns = SCHEDULE_COLUMNS;
+	
+		
+		//Set the layout to the composite
+		comp.setLayout(layout);
+		
+		setupContentsV2();
+		setupSchedule(comp);
+		
+	}
+		/*
 		
 		setupContents();
 		
@@ -58,6 +81,7 @@ public class schedule {
 		editor.horizontalAlignment = SWT.LEFT;
 		
 		setupScheduleWithNoContents(tableSetup);
+		
 		
 		tableSetup.addSelectionListener(new SelectionAdapter()
 		{
@@ -180,7 +204,7 @@ public class schedule {
 				}
 			}
 		});
-		*/
+		
 	}
 
 	private void setupScheduleWithNoContents(Table tbl)
@@ -208,8 +232,90 @@ public class schedule {
 			item.setText(contentsList.get(j));
 		}
 	}
+	*/
 	
+	private void setupSchedule(Composite comp)
+	{
+		//Initialize all cells of Text widgets
+		scheduleCells = new Text[SCHEDULE_COLUMNS * SCHEDULE_ROWS];
+		
+		for(int i = 0; i < SCHEDULE_ROWS; i++)
+		{
+			
+			for(int j = 0; j < SCHEDULE_COLUMNS; j++)
+			{
+				Text newTextField = new Text(comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+				newTextField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				newTextField.setText(contentsList.get(i * SCHEDULE_COLUMNS + j));
+				
+				int columns = 10;
+				GC gc = new GC(newTextField);
+				FontMetrics fm = gc.getFontMetrics();
+				int width = columns * fm.getAverageCharWidth();
+				int height  = fm.getHeight();
+				gc.dispose();
+				newTextField.setSize(newTextField.computeSize(width, height));
+				
+				scheduleCells[i * SCHEDULE_COLUMNS + j] = newTextField;
+				
+				/*
+				newTextField.addModifyListener(new ModifyListener()
+				{
+					
+					
+				});
+				*/
+			}
+		}
+	}
 	
+	public void setupContentsV2()
+	{
+		contentsList = new ArrayList<String>();
+		String times[] = {"8:00", "9:00", "10:00", "11:00", "NOON", "1:00", "2:00", "3:00"};
+		int timesIndex = 0;
+		int timesCounter = 2;
+		
+		String rooms[] = {"203", "204", "207"};
+		
+		for(int i = 0; i < SCHEDULE_ROWS *  SCHEDULE_COLUMNS; i++)
+		{
+			if(i < 6)
+			{
+				contentsList.add(header[i]);
+			}
+			else if(i % 6 == 0 && timesCounter == 2)
+			{
+				contentsList.add(times[timesIndex]);
+				timesIndex++;
+				timesCounter = 0;
+			}
+			else if(i % 6 == 0)
+			{
+				contentsList.add(new String(" "));
+				timesCounter++;
+			}
+			else
+			{
+				if(timesCounter == 0)
+				{
+					contentsList.add(rooms[0]);
+				}
+				else if(timesCounter == 1)
+				{
+					contentsList.add(rooms[1]);
+
+				}
+				else
+				{
+					contentsList.add(rooms[2]);
+				}
+			}
+			
+		}
+	}
+	
+	/*
 	public void setupContents()
 	{
 		contentsList = new ArrayList<String[]>();
@@ -259,6 +365,7 @@ public class schedule {
 			}
 			contentsList.add(str);
 		}
-		
+	
 	}
+	*/
 }

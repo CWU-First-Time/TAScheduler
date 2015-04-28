@@ -100,7 +100,7 @@ public class FirstWindow extends ApplicationWindow {
 		
 		Composite comp = new Composite(tabFolder, SWT.NONE);
 		tbtmNewItem.setControl(comp);
-		comp.setLayout(new FillLayout());
+		//comp.setLayout(new FillLayout());
 		//Point pt = tabFolder.getSize();
 		//System.out.println("tab size: " + pt.x);
 		
