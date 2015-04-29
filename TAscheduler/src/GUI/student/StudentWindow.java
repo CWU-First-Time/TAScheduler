@@ -82,7 +82,7 @@ public class StudentWindow {
 		availabilityColor = display.getSystemColor(SWT.COLOR_GREEN);
 		nearestQuarterColor = display.getSystemColor(SWT.COLOR_RED);
 		nextQuarterColor = display.getSystemColor(SWT.COLOR_YELLOW);
-		threeQuarterColor = display.getSystemColor(SWT.COLOR_GREEN);
+		threeQuarterColor = new Color(display, 125, 218, 232);
 
 
 		final Shell shell = parent.getShell();
@@ -112,6 +112,8 @@ public class StudentWindow {
 			}
 		});
 
+		final DayOfWeek[] days = DayOfWeek.values();
+		
 		// Listener to update availability table for selected student
 		studentTable.addSelectionListener(new SelectionListener() {
 
@@ -124,7 +126,6 @@ public class StudentWindow {
 				TableItem selected = studentTable.getSelection()[0];
 				Student student = tableMap.get(selected);
 
-				DayOfWeek[] days = DayOfWeek.values();
 				TableItem[] items = availabilityTable.getItems();
 
 				// Update availability
@@ -265,8 +266,8 @@ public class StudentWindow {
 				if (columnGrayed[columnIndex]) {
 					for (int i = 0; i < students.length; i++) {
 
-						students[i].setBackground(columnIndex, students[i].getBackground(0));
-						students[i].setForeground(columnIndex, display.getSystemColor(SWT.COLOR_BLACK));
+						
+						students[i].setText(columnIndex, tableMap.get(students[i]).getGrade(courseColumns[columnIndex-5]).toString());
 
 					}
 					
@@ -276,8 +277,7 @@ public class StudentWindow {
 
 					for (int i = 0; i < students.length; i++) {
 
-						students[i].setBackground(columnIndex, display.getSystemColor(SWT.COLOR_WHITE));
-						students[i].setForeground(columnIndex, display.getSystemColor(SWT.COLOR_WHITE));
+						students[i].setText(columnIndex, "");
 					}
 					
 					columnGrayed[columnIndex] = true;
@@ -402,8 +402,6 @@ public class StudentWindow {
 		});
 
 		// Populates availabitiy table with empty items
-		DayOfWeek[] days = DayOfWeek.values();
-
 		for (int i = 0; i < 10; i++) {
 
 			TableItem item = new TableItem(availabilityTable, SWT.NONE);
@@ -571,7 +569,6 @@ public class StudentWindow {
 					newItem.setText(i, gradeEntryTable.getItems()[0].getText(i-5));
 				
 				HashMap<DayOfWeek, ArrayList<Integer>> times = new HashMap<DayOfWeek, ArrayList<Integer>>();
-				DayOfWeek[] days = DayOfWeek.values();
 				
 				TableItem[] items = availabilityTable.getItems();
 				for (int i = 0; i < days.length; i++) {
@@ -604,6 +601,42 @@ public class StudentWindow {
 		Button updateStudentButton = new Button(addStudentComposite, SWT.NONE);
 		updateStudentButton.setBounds(142, 175, 116, 25);
 		updateStudentButton.setText("Update");
+		updateStudentButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				
+				TableItem row = studentTable.getSelection()[0];
+				Student selected = tableMap.get(row);
+				selected.setFirstName(nameInput.getText());
+				selected.setLastName(lastNameInput.getText());
+				selected.setEmail(emailInput.getText());
+				selected.setGradYear(Integer.parseInt(yearInput.getText()));
+				selected.setGradQuarter(Quarter.values()[quarterComboSelect.getSelectionIndex()]);
+				
+				HashMap<DayOfWeek, ArrayList<Integer>> times = new HashMap<DayOfWeek, ArrayList<Integer>>();
+				for (int i = 0; i < availabilityTable.getColumnCount(); i++) {
+					
+					ArrayList<Integer> hours = new ArrayList<Integer>();
+					for (int j = 0; j < 10; j++) {
+						if (!availabilityTable.getItem(j).getText().equals(""))
+							hours.add(j+8);
+					}
+					
+					times.put(days[i], hours);
+				}
+				
+				TableItem gradeItem = gradeEntryTable.getItem(0);
+				for (int i = 0; i < gradeEntryTable.getColumnCount(); i++) {
+					if (!gradeItem.getText(i).equals(""))
+						selected.getClassesTaken().put(courseColumns[i], Grade.values()[gradeItem.getText(i).toCharArray()[0]-65]);
+					else
+						selected.getClassesTaken().remove(courseColumns[i]);
+				}
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
 
 		addStudentComposite.setBounds(availabilityTable.getBounds().width + 5, 0, 260, 214);
 		sashForm.setWeights(new int[] { 310, 209 });

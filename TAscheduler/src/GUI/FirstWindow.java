@@ -162,7 +162,7 @@ public class FirstWindow extends ApplicationWindow {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText("Teaching Assistant Assistant (TAA)");
+		newShell.setText("Teacher's Aide Scheduling Kompanion (TASK)");
 	}
 
 	/**
