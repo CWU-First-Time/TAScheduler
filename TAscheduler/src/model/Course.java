@@ -12,14 +12,16 @@ public class Course implements Comparable<Course> {
 	private int maxTAcount = 0;
 	private int courseNumber;
 	private int section;
+	private int roomNumber;
 	private Instructor instructor;
 	
-	public Course(Instructor inst, int sec, int courseNum, int cred) {
+	public Course(Instructor inst, int sec, int courseNum, int cred, int room) {
 		
 		instructor = inst;
 		credits = cred;
 		section = sec;
 		courseNumber = courseNum;
+		roomNumber = room;
 		
 		timeOffered = new HashMap<DayOfWeek, Integer>();
 	}
@@ -111,5 +113,13 @@ public class Course implements Comparable<Course> {
 	public void setSection(int section) {
 		
 		this.section = section;
+	}
+
+	public int getRoomNumber() {
+		return roomNumber;
+	}
+
+	public void setRoomNumber(int roomNumber) {
+		this.roomNumber = roomNumber;
 	}
 }

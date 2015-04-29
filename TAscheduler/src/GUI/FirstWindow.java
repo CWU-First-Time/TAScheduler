@@ -42,6 +42,8 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.widgets.Table;
@@ -51,11 +53,16 @@ import scheduler.Scheduler;
 
 import org.eclipse.swt.widgets.Button;
 
+import GUI.course.CourseWindow;
 import GUI.student.StudentWindow;
+import org.eclipse.jface.action.Action;
 
 public class FirstWindow extends ApplicationWindow {
 
 	private StudentWindow studentWindow;
+	private CourseWindow courseWindow;
+	private Scheduler scheduler;
+	private Action exitAction;
 	
 	/**
 	 * Create the application window.
@@ -76,23 +83,34 @@ public class FirstWindow extends ApplicationWindow {
 	@Override
 	protected Control createContents(Composite parent) {
 		
+		scheduler = new Scheduler();
+		
 		final Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new FillLayout());
 
-		TabFolder tabFolder = new TabFolder(container, SWT.NONE);
+		CTabFolder tabFolder = new CTabFolder(container, SWT.NONE);
 		tabFolder.setBounds(0, 0, 784, 24);
+		tabFolder.setSimple(false);
 
-		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
-		tabItem.setText("New Item");
+		CTabItem studentTab = new CTabItem(tabFolder, SWT.NONE);
+		studentTab.setText("Students");
 
-		Composite composite = new Composite(tabFolder, SWT.NONE);
-		tabItem.setControl(composite);
-		composite.setLayout(new FillLayout());
+		Composite studentComposite = new Composite(tabFolder, SWT.NONE);
+		studentTab.setControl(studentComposite);
+		studentComposite.setLayout(new FillLayout());
 
-		studentWindow = new StudentWindow(composite, null);
+		studentWindow = new StudentWindow(studentComposite, scheduler);
 
-		TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
-		tbtmNewItem.setText("New Item");
+		CTabItem courseTab = new CTabItem(tabFolder, SWT.NONE);
+		courseTab.setText("Courses");
+		
+		Composite classComposite = new Composite(tabFolder, SWT.NONE);
+		courseTab.setControl(classComposite);
+		
+		courseWindow = new CourseWindow(classComposite, scheduler);
+		
+		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
+		scheduleTab.setText("Schedule");
 
 		return container;
 	}
@@ -102,6 +120,13 @@ public class FirstWindow extends ApplicationWindow {
 	 */
 	private void createActions() {
 		// Create the actions
+		{
+			exitAction = new Action("Close") {				public void run() {
+					System.exit(0);
+				}
+			};
+			exitAction.setAccelerator(SWT.ALT | SWT.F4);
+		}
 	}
 
 	/**
@@ -112,6 +137,10 @@ public class FirstWindow extends ApplicationWindow {
 	@Override
 	protected MenuManager createMenuManager() {
 		MenuManager menuManager = new MenuManager("menu");
+		
+		MenuManager fileMenu = new MenuManager("File");
+		menuManager.add(fileMenu);
+		fileMenu.add(exitAction);
 		return menuManager;
 	}
 

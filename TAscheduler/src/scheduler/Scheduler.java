@@ -197,7 +197,7 @@ public class Scheduler {
 				times.put(days[k], j);
 			}
 
-			Course stuff = new Course(new Instructor("Jean", "Joseph", null), 1, 400 + j, 4);
+			Course stuff = new Course(new Instructor("Jean", "Joseph", null), 1, 400 + j, 4, 200+j);
 			stuff.setTimeOffered(times);
 			classes.add(stuff);
 		}
