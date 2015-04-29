@@ -59,10 +59,10 @@ public class schedule {
 	public schedule(Composite comp)
 	{
 		//GridLayout
-		GridLayout layout = new GridLayout();
+		GridLayout layout = new GridLayout(SCHEDULE_COLUMNS,true);
 		
 		//Layout has six columns
-		layout.numColumns = SCHEDULE_COLUMNS;
+		//layout.numColumns = SCHEDULE_COLUMNS;
 	
 		
 		//Set the layout to the composite
@@ -244,10 +244,12 @@ public class schedule {
 			
 			for(int j = 0; j < SCHEDULE_COLUMNS; j++)
 			{
-				Text newTextField = new Text(comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
-				newTextField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				final Text newTextField = new Text(comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+				final GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+				newTextField.setLayoutData(gridData);
 				newTextField.setText(contentsList.get(i * SCHEDULE_COLUMNS + j));
 				
+				/*
 				int columns = 10;
 				GC gc = new GC(newTextField);
 				FontMetrics fm = gc.getFontMetrics();
@@ -255,16 +257,30 @@ public class schedule {
 				int height  = fm.getHeight();
 				gc.dispose();
 				newTextField.setSize(newTextField.computeSize(width, height));
-				
+				*/
 				scheduleCells[i * SCHEDULE_COLUMNS + j] = newTextField;
 				
-				/*
+				
 				newTextField.addModifyListener(new ModifyListener()
 				{
-					
-					
+					@Override
+					public void modifyText(ModifyEvent arg0) {
+						
+						gridData.heightHint = newTextField.getLineCount();
+						newTextField.setLayoutData(gridData);
+						
+						/*
+						int columns = 20;
+						GC gc = new GC(newTextField);
+						FontMetrics fm = gc.getFontMetrics();
+						int width = columns * fm.getAverageCharWidth();
+						int height  = fm.getHeight();
+						gc.dispose();
+						newTextField.setSize(newTextField.computeSize(width, height));
+						*/
+					}
 				});
-				*/
+				
 			}
 		}
 	}
