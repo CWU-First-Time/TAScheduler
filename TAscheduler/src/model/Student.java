@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +9,7 @@ import java.util.TreeMap;
 
 import model.Course;
 
-public class Student implements Comparable<Student> {
+public class Student implements Comparable<Student>, Serializable {
 
 	private Map<DayOfWeek, ArrayList<Integer>> hoursAvailable;
 	private String firstName;

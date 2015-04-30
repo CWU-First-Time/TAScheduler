@@ -1,5 +1,6 @@
 package scheduler;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,15 +20,17 @@ import model.Quarter;
 import model.Student;
 
 
-public class Scheduler {
+public class Scheduler implements Serializable {
 
 	private final int MAX_TA_HOURS = 1;
 	private PriorityQueue<Student> students;
 	private PriorityQueue<Course> courseQueue;
 	private ArrayList<Course> classes;
+	private ArrayList<Instructor> instructors;
 	private Map<Course, PriorityQueue<Student>> possibleTAs;
 	private Map<Student, ArrayList<Course>> possibleCourses;
 	private DayOfWeek[] days = DayOfWeek.values();
+	private boolean[] studentColumnsGrayed;
 
 	private ArrayList<Course> getPossibleCourses(Student stud) {
 
@@ -144,9 +147,31 @@ public class Scheduler {
 
 	public Scheduler() {
 
-		possibleCourses = new TreeMap<Student, ArrayList<Course>>();
 		students = new PriorityQueue<Student>();
 		courseQueue = new PriorityQueue<Course>(new CourseComparator());
+		classes = new ArrayList<Course>();
+		instructors = new ArrayList<Instructor>();
+		
+		possibleCourses = new TreeMap<Student, ArrayList<Course>>();
+		
+		possibleTAs = new TreeMap<Course, PriorityQueue<Student>>();
+		
+		for (int j = 0; j < 10; j++) {
+
+			TreeMap<DayOfWeek, Integer> times = new TreeMap<DayOfWeek, Integer>();
+
+			for (int k = 0; k < 7; k++) {
+				
+				times.put(days[k], j);
+			}
+
+			Course stuff = new Course(new Instructor("Jean", "Joseph", null), 1, 400 + j, 4, 200+j);
+			stuff.setTimeOffered(times);
+			classes.add(stuff);
+		}
+		
+		for (int i = 0; i < classes.size(); i++)
+			possibleTAs.put(classes.get(i), new PriorityQueue<Student>());
 
 		Random random = new Random();
 		Quarter[] quarters = Quarter.values();	
@@ -185,22 +210,6 @@ public class Scheduler {
 
 			}
 		}
-
-		classes = new ArrayList<Course>();
-
-		for (int j = 0; j < 10; j++) {
-
-			TreeMap<DayOfWeek, Integer> times = new TreeMap<DayOfWeek, Integer>();
-
-			for (int k = 0; k < 7; k++) {
-				
-				times.put(days[k], j);
-			}
-
-			Course stuff = new Course(new Instructor("Jean", "Joseph", null), 1, 400 + j, 4, 200+j);
-			stuff.setTimeOffered(times);
-			classes.add(stuff);
-		}
 		
 		LinkedList<Student> studse = new LinkedList<Student>(students);
 		
@@ -228,21 +237,14 @@ public class Scheduler {
 			}
 		}
 
-		possibleTAs = new TreeMap<Course, PriorityQueue<Student>>();
-		for (int i = 0; i < classes.size(); i++)
-			possibleTAs.put(classes.get(i), new PriorityQueue<Student>());
-
 		PriorityQueue<Student> studs = new PriorityQueue<Student>(students);
 
 		while (!studs.isEmpty())
 			possibleCourses.put(studs.peek(), getPossibleCourses(studs.remove()));
-
+		
 		for (int i = 0; i < classes.size(); i++)
 			courseQueue.add(classes.get(i));
-		/*
-		while (!courseQueue.isEmpty())
-			System.out.println("\nFor: " + courseQueue.peek() + "\n" + schedule(courseQueue.remove(), 4, false) + "\n\n");;
-	*/
+		
 	}
 	
 	public LinkedList<Student> getStudents() {
@@ -265,6 +267,11 @@ public class Scheduler {
 		return classes.add(c);
 	}
 	
+	public boolean addInstructor(Instructor i) {
+		
+		return instructors.add(i);
+	}
+	
 	public boolean removeStudent(Student stud) {
 		
 		return students.remove(stud);
@@ -275,14 +282,42 @@ public class Scheduler {
 		return classes.remove(c);
 	}
 	
- 	private class CourseComparator implements Comparator<Course> {
+	public boolean removeInstructor(Instructor i) {
+		
+		return instructors.remove(i);
+	}
+	
+	public ArrayList<Instructor> getInstructors() {
+		
+		return instructors;
+	}
+
+	public void setInstructors(ArrayList<Instructor> instructors) {
+		
+		this.instructors = instructors;
+	}
+	
+ 	private class CourseComparator implements Comparator<Course>, Serializable {
 
 		public int compare(Course c1, Course c2) {
 
-			return possibleTAs.get(c1).size() - possibleTAs.get(c2).size();
+			if (possibleTAs != null) 
+				return possibleTAs.get(c1).size() - possibleTAs.get(c2).size();
+			else
+				return 0;
 			
 		}
 		
+	}
+
+	public boolean[] getStudentColumnsGrayed() {
+		
+		return studentColumnsGrayed;
+	}
+
+	public void setStudentColumnsGrayed(boolean[] studentColumnsGrayed) {
+		
+		this.studentColumnsGrayed = studentColumnsGrayed;
 	}
 
 }
