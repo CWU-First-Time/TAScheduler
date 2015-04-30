@@ -1,8 +1,9 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Instructor {
+public class Instructor implements Serializable {
 
 	private String firstName;
 	private String lastName;

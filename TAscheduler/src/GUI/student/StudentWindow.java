@@ -1,6 +1,7 @@
 package GUI.student;
 
 import java.awt.EventQueue;
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -66,7 +67,6 @@ public class StudentWindow {
 	private Color nearestQuarterColor;
 	private Color nextQuarterColor;
 	private Color threeQuarterColor;
-	private boolean[] columnGrayed;
 	private Display display;
 	private SashForm sashForm;
 	private Composite addStudentComposite;
@@ -176,7 +176,7 @@ public class StudentWindow {
 						}
 					}
 					
-					if (columnGrayed[columnIndex])
+					if (scheduler.getStudentColumnsGrayed()[columnIndex])
 						return;
 
 					comparataur = new ColumnComparator(columnIndex);
@@ -204,7 +204,7 @@ public class StudentWindow {
 
 					for (int i = 5; i < studentTableColumns.length; i++) {
 
-						if (grades.containsKey(classes.peek()) && !columnGrayed[i])
+						if (grades.containsKey(classes.peek()) && !scheduler.getStudentColumnsGrayed()[i])
 							item.setText(i, grades.get(classes.remove()).toString());
 
 					}
@@ -229,7 +229,7 @@ public class StudentWindow {
 					}
 				}
 				
-				if (columnGrayed[columnIndex]) {
+				if (scheduler.getStudentColumnsGrayed()[columnIndex]) {
 					for (int i = 0; i < students.length; i++) 
 						
 						students[i].setText(columnIndex, studentMap.get(students[i]).getGrade(courseColumns[columnIndex-5]).toString());
@@ -244,7 +244,7 @@ public class StudentWindow {
 					
 					}
 					
-					columnGrayed[columnIndex] = false;
+					scheduler.getStudentColumnsGrayed()[columnIndex] = false;
 					
 				} else {
 
@@ -256,7 +256,7 @@ public class StudentWindow {
 					if (studentTable.getSelectionCount() > 0)
 						gradeCombos.get(columnIndex-5).select(Grade.values().length);
 					
-					columnGrayed[columnIndex] = true;
+					scheduler.getStudentColumnsGrayed()[columnIndex] = true;
 
 				}
 			}
@@ -310,7 +310,7 @@ public class StudentWindow {
 		TableItem[] items = studentTable.getItems();
 		
 		studentTableColumns = studentTable.getColumns();
-		columnGrayed = new boolean[studentTableColumns.length];
+		scheduler.setStudentColumnsGrayed(new boolean[studentTable.getColumnCount()]);
 
 		// Adds students to the table and color codes them if they graduate
 		// within three quarters
@@ -329,9 +329,13 @@ public class StudentWindow {
 			classes = new PriorityQueue<Course>(scheduler.getCourses());
 			for (int j = 0; j < studentTableColumns.length; j++) {
 
-				if (grades.containsKey(classes.peek()))
-					items[i].setText(j + 5, grades.get(classes.remove())
-							.toString());
+				if (grades.containsKey(classes.peek())) {
+					System.out.println(scheduler.getStudentColumnsGrayed()[j]);
+					if (!scheduler.getStudentColumnsGrayed()[j+5]) 
+						items[i].setText(j + 5, grades.get(classes.remove()).toString());
+					else
+						classes.remove();
+				}
 			}
 			
 			items[i].setBackground(getStudentColor(stud));
@@ -517,7 +521,7 @@ public class StudentWindow {
 					
 					for (int i = 5; i < gradeEntryTable.getColumnCount() + 5; i++) {
 						
-						if (!columnGrayed[i])
+						if (!scheduler.getStudentColumnsGrayed()[i])
 							newItem.setText(i, gradeCombos.get(i-5).getText());
 					}
 					
@@ -597,7 +601,7 @@ public class StudentWindow {
 				
 				for (int i = 0; i < gradeEntryTable.getColumnCount(); i++) {
 					
-					if (!columnGrayed[i+5]) {
+					if (!scheduler.getStudentColumnsGrayed()[i+5]) {
 						
 						inputs.add(gradeCombos.get(i).getText());
 						
@@ -661,7 +665,7 @@ public class StudentWindow {
 			gradeCombos.add(grades);
 			
 		}
-	
+
 		gradeEntryTable.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 100, lowerScroll.getBounds().width - (addStudentComposite.getBounds().width + availabilityTable.getBounds().width) - 35, 60);
 	
 		shell.addControlListener(new ControlListener() {
@@ -682,7 +686,7 @@ public class StudentWindow {
 					sashForm.setWeights(weights);
 
 				} catch(IllegalArgumentException ex) {
-					System.out.println("Error");
+					
 				}
 			}
 			
@@ -724,7 +728,7 @@ public class StudentWindow {
 		for (int j = 0; j < gradeEntryTable.getColumnCount(); j++) {
 			
 			Course course = classes.remove();
-			if (grades.containsKey(course) && !columnGrayed[j+5])
+			if (grades.containsKey(course) && !scheduler.getStudentColumnsGrayed()[j+5])
 				gradeCombos.get(j).select(grades.get(course).getValue());
 			else 
 				gradeCombos.get(j).select(Grade.values().length);
@@ -793,7 +797,7 @@ public class StudentWindow {
 		}
 	};
 	
-	private static final class ColumnComparator implements Comparator<TableItem> {
+	private static final class ColumnComparator implements Comparator<TableItem>, Serializable {
 
 		private int index = 0;
 

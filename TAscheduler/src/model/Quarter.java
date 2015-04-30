@@ -1,6 +1,8 @@
 package model;
 
-public enum Quarter {
+import java.io.Serializable;
+
+public enum Quarter implements Serializable {
 	
 	WINTER(0),
 	

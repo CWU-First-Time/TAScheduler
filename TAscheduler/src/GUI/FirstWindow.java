@@ -1,75 +1,59 @@
-<<<<<<< HEAD
 package GUI;
 
-import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-
-import model.Course;
-import model.Grade;
-import model.Quarter;
-import model.Student;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.jface.action.Action;
 
 import scheduler.Scheduler;
-
-import org.eclipse.swt.widgets.Button;
-
-import GUI.course.CourseWindow;
 import GUI.student.StudentWindow;
-import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.Separator;
 
 public class FirstWindow extends ApplicationWindow {
 
 	private StudentWindow studentWindow;
-	private CourseWindow courseWindow;
 	private Scheduler scheduler;
 	private Action exitAction;
+	private Action saveAction;
+	private Action openAction;
+	private Action newAction;
+	private FileDialog fileChooser;
+	private FirstWindow shell;
 	
 	/**
-	 * Create the application window.
+	 * @wbp.parser.constructor 
 	 */
 	public FirstWindow() {
 		super(null);
+		createActions();
+		addToolBar(SWT.FLAT | SWT.WRAP);
+		addMenuBar();
+		addStatusLine();
+	}
+	
+	public FirstWindow(Scheduler s) {
+		super(null);
+		scheduler = s;
 		createActions();
 		addToolBar(SWT.FLAT | SWT.WRAP);
 		addMenuBar();
@@ -84,7 +68,10 @@ public class FirstWindow extends ApplicationWindow {
 	@Override
 	protected Control createContents(Composite parent) {
 		
-		scheduler = new Scheduler();
+		shell = this;
+		
+		if (scheduler == null) 
+			scheduler = new Scheduler();
 		
 		final Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new FillLayout());
@@ -108,8 +95,6 @@ public class FirstWindow extends ApplicationWindow {
 		Composite classComposite = new Composite(tabFolder, SWT.NONE);
 		courseTab.setControl(classComposite);
 		
-		courseWindow = new CourseWindow(classComposite, scheduler);
-		
 		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
 		scheduleTab.setText("Schedule");
 
@@ -128,6 +113,72 @@ public class FirstWindow extends ApplicationWindow {
 			};
 			exitAction.setAccelerator(SWT.ALT | SWT.F4);
 		}
+		
+		{
+			
+			saveAction = new Action("Save") {
+				public void run() {
+					
+					fileChooser = new FileDialog(shell.getShell(), SWT.SAVE);
+					String file = fileChooser.open();
+					file += ".TASK";
+					
+					try {
+						
+						ObjectOutputStream writer = new ObjectOutputStream(new FileOutputStream(file)); 
+						writer.writeObject(scheduler);
+						writer.close();
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+				}
+			};
+			saveAction.setAccelerator(SWT.CTRL | 'S');
+		}
+		
+		{
+			openAction = new Action("Open") {
+				public void run() {
+					
+					fileChooser = new FileDialog(shell.getShell(), SWT.OPEN);
+					fileChooser.setFilterExtensions(new String[] {"*.TASK"});
+					String file = fileChooser.open();
+					
+					try {
+						
+						ObjectInputStream reader = new ObjectInputStream(new FileInputStream(file)); 
+						scheduler = (Scheduler)reader.readObject();
+						reader.close();
+						
+						shell.getShell().setVisible(false);
+						
+						shell = new FirstWindow(scheduler);
+						shell.open();
+						
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			openAction.setAccelerator(SWT.CTRL | 'O');
+		}
+		
+		{
+			
+			newAction = new Action("New Workbook") {
+				public void run() {
+					
+					shell.getShell().setVisible(false);
+					
+					shell = new FirstWindow(scheduler);
+					shell.open();
+				}
+			};
+			newAction.setAccelerator(SWT.CTRL | 'N');
+		}
 	}
 
 	/**
@@ -141,6 +192,10 @@ public class FirstWindow extends ApplicationWindow {
 		
 		MenuManager fileMenu = new MenuManager("File");
 		menuManager.add(fileMenu);
+		fileMenu.add(saveAction);
+		fileMenu.add(openAction);
+		fileMenu.add(newAction);
+		fileMenu.add(new Separator());
 		fileMenu.add(exitAction);
 		return menuManager;
 	}
@@ -193,6 +248,27 @@ public class FirstWindow extends ApplicationWindow {
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText("Teacher's Aide Scheduling Kompanion (TASK)");
+		newShell.addShellListener(new ShellListener() {
+			public void shellActivated(ShellEvent e) {
+				
+			}
+			
+			public void shellIconified(ShellEvent e) {
+				
+			}
+			
+			public void shellDeiconified(ShellEvent e) {
+				
+			}
+			
+			public void shellClosed(ShellEvent e) {
+				System.exit(0);
+			}
+			
+			public void shellDeactivated(ShellEvent e) {
+				
+			}
+		});
 	}
 
 	/**
@@ -204,194 +280,3 @@ public class FirstWindow extends ApplicationWindow {
 	}
 
 }
-=======
-package GUI;
-
-import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-
-import model.Course;
-import model.Grade;
-import model.Quarter;
-import model.Student;
-
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.StatusLineManager;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.window.ApplicationWindow;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
-import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.ScrolledComposite;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-
-import scheduler.Scheduler;
-
-import org.eclipse.swt.widgets.Button;
-
-import GUI.student.StudentWindow;
-import GUI.schedule.*;
-
-public class FirstWindow extends ApplicationWindow {
-
-	private StudentWindow studentWindow;
-	private schedule scheduleWindow;
-	
-	/**
-	 * Create the application window.
-	 */
-	public FirstWindow() {
-		super(null);
-		createActions();
-		addToolBar(SWT.FLAT | SWT.WRAP);
-		addMenuBar();
-		addStatusLine();
-	}
-
-	/**
-	 * Create contents of the application window.
-	 * 
-	 * @param parent
-	 */
-	@Override
-	protected Control createContents(Composite parent) {
-		
-		final Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new FillLayout());
-
-		TabFolder tabFolder = new TabFolder(container, SWT.NONE);
-		tabFolder.setBounds(0, 0, 784, 24);
-
-		TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
-		tabItem.setText("New Item");
-
-		Composite composite = new Composite(tabFolder, SWT.NONE);
-		tabItem.setControl(composite);
-		composite.setLayout(new FillLayout());
-
-		studentWindow = new StudentWindow(composite, null);
-
-		TabItem tbtmNewItem = new TabItem(tabFolder, SWT.NONE);
-		tbtmNewItem.setText("New Item");
-		
-		Composite comp = new Composite(tabFolder, SWT.NONE);
-		tbtmNewItem.setControl(comp);
-		//comp.setLayout(new FillLayout());
-		//Point pt = tabFolder.getSize();
-		//System.out.println("tab size: " + pt.x);
-		
-		scheduleWindow = new schedule(comp);
-		
-
-		return container;
-	}
-
-	/**
-	 * Create the actions.
-	 */
-	private void createActions() {
-		// Create the actions
-	}
-
-	/**
-	 * Create the menu manager.
-	 * 
-	 * @return the menu manager
-	 */
-	@Override
-	protected MenuManager createMenuManager() {
-		MenuManager menuManager = new MenuManager("menu");
-		return menuManager;
-	}
-
-	/**
-	 * Create the toolbar manager.
-	 * 
-	 * @return the toolbar manager
-	 */
-	@Override
-	protected ToolBarManager createToolBarManager(int style) {
-		ToolBarManager toolBarManager = new ToolBarManager(style);
-		return toolBarManager;
-	}
-
-	/**
-	 * Create the status line manager.
-	 * 
-	 * @return the status line manager
-	 */
-	@Override
-	protected StatusLineManager createStatusLineManager() {
-		StatusLineManager statusLineManager = new StatusLineManager();
-		return statusLineManager;
-	}
-
-	/**
-	 * Launch the application.
-	 * 
-	 * @param args
-	 */
-	public static void main(String args[]) {
-
-		try {
-			FirstWindow window = new FirstWindow();
-			window.setBlockOnOpen(true);
-			window.open();
-			Display.getCurrent().dispose();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Configure the shell.
-	 * 
-	 * @param newShell
-	 */
-	@Override
-	protected void configureShell(Shell newShell) {
-		super.configureShell(newShell);
-		newShell.setText("Teaching Assistant Assistant (TAA)");
-	}
-
-	/**
-	 * Return the initial size of the window.
-	 */
-	@Override
-	protected Point getInitialSize() {
-		return new Point(Display.getCurrent().getBounds().width, Display.getCurrent().getBounds().height);
-	}
-
-}
->>>>>>> origin/HEAD

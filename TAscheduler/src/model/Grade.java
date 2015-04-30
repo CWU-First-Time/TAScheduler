@@ -1,6 +1,8 @@
 package model;
 
-public enum Grade {
+import java.io.Serializable;
+
+public enum Grade implements Serializable {
 
 	A(0),
 	

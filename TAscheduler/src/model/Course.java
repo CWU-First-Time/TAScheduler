@@ -1,11 +1,11 @@
 package model;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.HashMap;
 import java.util.Map;
 
-
-public class Course implements Comparable<Course> {
+public class Course implements Comparable<Course>, Serializable {
 
 	private Map<DayOfWeek, Integer> timeOffered;
 	private int credits = 0;
