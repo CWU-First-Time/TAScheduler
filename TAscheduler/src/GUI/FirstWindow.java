@@ -26,6 +26,13 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.jface.action.Action;
 
 import scheduler.Scheduler;
+<<<<<<< HEAD
+=======
+
+import org.eclipse.swt.widgets.Button;
+
+import GUI.schedule.*;
+>>>>>>> bc281ef7d99fbd3cce8c932b230c785f0b09c685
 import GUI.student.StudentWindow;
 import org.eclipse.jface.action.Separator;
 
@@ -95,9 +102,45 @@ public class FirstWindow extends ApplicationWindow {
 		Composite classComposite = new Composite(tabFolder, SWT.NONE);
 		courseTab.setControl(classComposite);
 		
+<<<<<<< HEAD
+=======
+		
+>>>>>>> bc281ef7d99fbd3cce8c932b230c785f0b09c685
 		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
 		scheduleTab.setText("Schedule");
-
+		
+		ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		scheduleTab.setControl(scrolledComposite);
+		scrolledComposite.setExpandHorizontal(true);
+		scrolledComposite.setExpandVertical(true);
+		
+		scrolledComposite.setAlwaysShowScrollBars(true);
+		
+		//scrolledComposite.setMinSize(400, 2000);
+		
+		
+		schedule sch = new schedule(scrolledComposite);
+		
+		
+		
+		/*
+		//ScrollableComposite
+		//ScrolledComposite scrollComp = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.BORDER);
+		
+		ScrolledComposite scheduleTabComposite = new ScrolledComposite(tabFolder, SWT.None);
+		//scheduleTab.setControl(scheduleTabComposite);
+		
+		schedule sch = new schedule(scheduleTabComposite);
+		
+		//scrollComp.setContent(scheduleTabComposite);
+		//scrollComp.setMinSize(scheduleTabComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		//System.out.println("Height: " + scrollComp.getMinHeight() + "\nWidth: " + scrollComp.getMinWidth());
+		
+		scheduleTab.setControl(scheduleTabComposite);
+		*/
+		
+		
 		return container;
 	}
 
@@ -233,6 +276,7 @@ public class FirstWindow extends ApplicationWindow {
 			FirstWindow window = new FirstWindow();
 			window.setBlockOnOpen(true);
 			window.open();
+			
 			Display.getCurrent().dispose();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -279,4 +323,8 @@ public class FirstWindow extends ApplicationWindow {
 		return new Point(Display.getCurrent().getBounds().width, Display.getCurrent().getBounds().height);
 	}
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> bc281ef7d99fbd3cce8c932b230c785f0b09c685
