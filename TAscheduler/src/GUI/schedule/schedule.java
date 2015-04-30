@@ -50,20 +50,25 @@ public class schedule {
 	private Text scheduleCells[];
 	
 	//Total of 144 cells
-	int SCHEDULE_COLUMNS = 6;
-	int SCHEDULE_ROWS =24;
+	final int SCHEDULE_COLUMNS = 6;
+	final int SCHEDULE_ROWS =25;
 	
 	int ROW_SELECTED = 0;
 	int COLUMN_SELECTED = 1;
 	
-	public schedule(Composite comp)
+	GridLayout layout;
+	Composite comp;
+	
+	public schedule(ScrolledComposite comps)
 	{
 		//GridLayout
-		GridLayout layout = new GridLayout(SCHEDULE_COLUMNS,true);
+		layout = new GridLayout(SCHEDULE_COLUMNS,true);
 		
-		//Layout has six columns
-		//layout.numColumns = SCHEDULE_COLUMNS;
-	
+		comp = new Composite(comps, SWT.NONE);
+		//comp.setBounds(0, 0, 2000, 2000);
+		comps.setContent(comp);
+		
+		layout.horizontalSpacing = 0;
 		
 		//Set the layout to the composite
 		comp.setLayout(layout);
@@ -72,169 +77,8 @@ public class schedule {
 		setupSchedule(comp);
 		
 	}
-		/*
-		
-		setupContents();
-		
-		tableSetup = new Table(comp, SWT.BORDER | SWT.FULL_SELECTION);
-		editor = new TableEditor(tableSetup);
-		editor.horizontalAlignment = SWT.LEFT;
-		
-		setupScheduleWithNoContents(tableSetup);
-		
-		
-		tableSetup.addSelectionListener(new SelectionAdapter()
-		{
-				public void widgetSelected(SelectionEvent e)
-				{
-					Control oldEditor = editor.getEditor();
-					if(oldEditor != null)
-						oldEditor.dispose();
-					
-					TableItem item = (TableItem) e.item;
-					
-					if(item ==  null)
-						return;
-					
-					Text newEditor = new Text(tableSetup,SWT.NONE);
-					newEditor.setText(item.getText(COLUMN_SELECTED));
-					newEditor.addModifyListener(new ModifyListener(){
-
-						@Override
-						public void modifyText(ModifyEvent me) {
-							// TODO Auto-generated method stub
-							Text text = (Text)editor.getEditor();
-							editor.getItem().setText(COLUMN_SELECTED, text.getText());
-						}
-					});
-					newEditor.selectAll();
-					newEditor.setFocus();
-					editor.setEditor(newEditor, item, COLUMN_SELECTED);
-				}
-		}
-		);
-		/*
-		tableSetup.addListener(SWT.MouseDown, new Listener(){
-			
-			@Override
-			public void handleEvent(Event event)
-			{
-				Point pos = new Point(event.x, event.y);
-				TableItem item = tableSetup.getItem(pos);
-				Rectangle clientArea = tableSetup.getClientArea();
-				System.out.print("Elements ");
-
-				String temp[] = new String[6];
-				for(int j = 0; j < temp.length; j++)
-				{	
-					temp[j] = item.getText(j);
-					System.out.print(temp[j] + " ");
-					
-				}
-				
-				if(item == null)
-					return;
-				for(int i = 0; i < SCHEDULE_COLUMNS; i++)
-				{
-					Rectangle rect = item.getBounds(i);
-					if(rect.contains(pos));
-						int index = tableSetup.indexOf(item);
-						//System.out.println("Item " + index + "-" + i);
-						
-						ROW_SELECTED = index;
-					
-				}
-				
-				System.out.println("\nRow: " + ROW_SELECTED + "\nColumn: " + COLUMN_SELECTED);
-				
-				
-				int index = tableSetup.getTopIndex();
-				while(index < tableSetup.getItemCount())
-				{
-					boolean visible = false;
-					final TableItem tempItem = tableSetup.getItem(index);
-					for(int k = 0; k < tableSetup.getItemCount(); k++)
-					{
-						Rectangle rect  = item.getBounds(k);
-						if(rect.contains(pos))
-						{
-							final int column = k;
-							final Text text  = new Text(tableSetup, SWT.NONE);
-							Listener textListener = new Listener()
-							{
-								@Override
-								public void handleEvent(final Event e)
-								{
-									switch(e.type)
-									{
-									case SWT.FocusOut:
-										tempItem.setText(column, text.getText());
-										text.dispose();
-										break;
-									case SWT.Traverse:
-										switch(e.detail)
-										{
-										case SWT.TRAVERSE_RETURN:
-											tempItem.setText(column, text.getText());
-										case SWT.TRAVERSE_ESCAPE:
-											text.dispose();
-											e.doit = false;
-										}
-										break;
-									
-									}
-								}
-							};
-							text.addListener(SWT.FocusOut, textListener);
-							text.addListener(SWT.Traverse, textListener);
-							editor.setEditor(text, tempItem, k);
-							text.setText(tempItem.getText(k));
-							text.selectAll();
-							text.setFocus();
-							return;
-						}
-						if(!visible && rect.intersects(clientArea))
-						{
-							visible = true;
-						}
-					}
-					if(!visible) 
-						return;
-					index++;
-				}
-			}
-		});
-		
-	}
-
-	private void setupScheduleWithNoContents(Table tbl)
-	{
-		
-		tbl.setLinesVisible(true);
-		tbl.setHeaderVisible(true);
-		
-		//Set columns
-		for(int i = 0; i< SCHEDULE_COLUMNS; i++)
-		{
-			TableColumn column = new TableColumn(tbl, SWT.NONE);
-			
-			if(i == 0)
-				column.setWidth(80);
-			else
-				column.setWidth(200);
-			column.setText(header[i]);
-		}
-		
-		//Add contents
-		for(int j = 0; j < SCHEDULE_ROWS; j++)
-		{
-			TableItem item = new TableItem(tbl, SWT.NONE);
-			item.setText(contentsList.get(j));
-		}
-	}
-	*/
 	
-	private void setupSchedule(Composite comp)
+	private void setupSchedule(final Composite comp)
 	{
 		//Initialize all cells of Text widgets
 		scheduleCells = new Text[SCHEDULE_COLUMNS * SCHEDULE_ROWS];
@@ -244,20 +88,12 @@ public class schedule {
 			
 			for(int j = 0; j < SCHEDULE_COLUMNS; j++)
 			{
-				final Text newTextField = new Text(comp, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL);
+				final Text newTextField = new Text(comp, SWT.BORDER_DASH | SWT.MULTI | SWT.V_SCROLL);
 				final GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+				
 				newTextField.setLayoutData(gridData);
 				newTextField.setText(contentsList.get(i * SCHEDULE_COLUMNS + j));
-				
-				/*
-				int columns = 10;
-				GC gc = new GC(newTextField);
-				FontMetrics fm = gc.getFontMetrics();
-				int width = columns * fm.getAverageCharWidth();
-				int height  = fm.getHeight();
-				gc.dispose();
-				newTextField.setSize(newTextField.computeSize(width, height));
-				*/
+
 				scheduleCells[i * SCHEDULE_COLUMNS + j] = newTextField;
 				
 				
@@ -266,18 +102,18 @@ public class schedule {
 					@Override
 					public void modifyText(ModifyEvent arg0) {
 						
-						gridData.heightHint = newTextField.getLineCount();
-						newTextField.setLayoutData(gridData);
 						
-						/*
-						int columns = 20;
 						GC gc = new GC(newTextField);
 						FontMetrics fm = gc.getFontMetrics();
-						int width = columns * fm.getAverageCharWidth();
-						int height  = fm.getHeight();
+						
+						int height = fm.getHeight();
+						
 						gc.dispose();
-						newTextField.setSize(newTextField.computeSize(width, height));
-						*/
+
+						gridData.heightHint = newTextField.getLineCount() * height;
+						newTextField.setLayoutData(gridData);
+						
+						comp.layout();
 					}
 				});
 				
@@ -329,6 +165,13 @@ public class schedule {
 			}
 			
 		}
+		
+		/*
+		for(String str: contentsList)
+		{
+			System.out.println(str);
+		}
+		*/
 	}
 	
 	/*
