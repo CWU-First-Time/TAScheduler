@@ -25,13 +25,13 @@ public enum Quarter implements Serializable {
 	}
 	
 	public static Quarter getQuarter(String str) {
-		if (str.equals("Winter"))
+		if (str.equals("winter") || str.equals("Winter"))
 			return WINTER;
-		else if (str.equals("Spring"))
+		else if (str.equals("spring") || str.equals("Spring"))
 			return SPRING;
-		else if (str.equals("Summer"))
+		else if (str.equals("summer") || str.equals("Summer"))
 			return SUMMER;
-		else if (str.equals("Fall"))
+		else if (str.equals("fall") || str.equals("Fall"))
 			return FALL;
 		else
 			return null;

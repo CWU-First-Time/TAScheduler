@@ -12,8 +12,12 @@ import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -23,16 +27,16 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.jface.action.Action;
 
 import scheduler.Scheduler;
-<<<<<<< HEAD
-=======
 
 import org.eclipse.swt.widgets.Button;
 
+import GUI.Instructors.InstructorWindow;
 import GUI.schedule.*;
->>>>>>> bc281ef7d99fbd3cce8c932b230c785f0b09c685
+
 import GUI.student.StudentWindow;
 import org.eclipse.jface.action.Separator;
 
@@ -46,6 +50,15 @@ public class FirstWindow extends ApplicationWindow {
 	private Action newAction;
 	private FileDialog fileChooser;
 	private FirstWindow shell;
+	private ColorDialog colorChooser;
+	private Action nearQColorAction;
+	private Action twoQColorAction;
+	private Action threeQColorAction;
+	private Action paidColorAction;
+	private Composite studentComposite;
+	private Action detachStudentAction;
+	private CTabFolder tabFolder;
+	private CTabItem studentTab;
 	
 	/**
 	 * @wbp.parser.constructor 
@@ -83,29 +96,25 @@ public class FirstWindow extends ApplicationWindow {
 		final Composite container = new Composite(parent, SWT.NONE);
 		container.setLayout(new FillLayout());
 
-		CTabFolder tabFolder = new CTabFolder(container, SWT.NONE);
+		tabFolder = new CTabFolder(container, SWT.NONE);
 		tabFolder.setBounds(0, 0, 784, 24);
 		tabFolder.setSimple(false);
 
-		CTabItem studentTab = new CTabItem(tabFolder, SWT.NONE);
+		studentTab = new CTabItem(tabFolder, SWT.NONE);
 		studentTab.setText("Students");
 
-		Composite studentComposite = new Composite(tabFolder, SWT.NONE);
+		studentComposite = new Composite(tabFolder, SWT.NONE);
 		studentTab.setControl(studentComposite);
 		studentComposite.setLayout(new FillLayout());
 
 		studentWindow = new StudentWindow(studentComposite, scheduler);
 
 		CTabItem courseTab = new CTabItem(tabFolder, SWT.NONE);
-		courseTab.setText("Courses");
+		courseTab.setText("Courses and Instructors");
 		
-		Composite classComposite = new Composite(tabFolder, SWT.NONE);
+		Composite classComposite = new InstructorWindow(tabFolder, SWT.NONE, scheduler);
 		courseTab.setControl(classComposite);
-		
-<<<<<<< HEAD
-=======
-		
->>>>>>> bc281ef7d99fbd3cce8c932b230c785f0b09c685
+
 		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
 		scheduleTab.setText("Schedule");
 		
@@ -163,8 +172,8 @@ public class FirstWindow extends ApplicationWindow {
 				public void run() {
 					
 					fileChooser = new FileDialog(shell.getShell(), SWT.SAVE);
+					fileChooser.setOverwrite(true);
 					String file = fileChooser.open();
-					file += ".TASK";
 					
 					try {
 						
@@ -186,7 +195,6 @@ public class FirstWindow extends ApplicationWindow {
 				public void run() {
 					
 					fileChooser = new FileDialog(shell.getShell(), SWT.OPEN);
-					fileChooser.setFilterExtensions(new String[] {"*.TASK"});
 					String file = fileChooser.open();
 					
 					try {
@@ -222,6 +230,115 @@ public class FirstWindow extends ApplicationWindow {
 			};
 			newAction.setAccelerator(SWT.CTRL | 'N');
 		}
+		
+		{
+			nearQColorAction = new Action("Nearest Quarter Color") {				public void run() {
+					
+					colorChooser = new ColorDialog(Display.getCurrent().getActiveShell());
+					colorChooser.setRGB(studentWindow.getNearestQuarterColor().getRGB());
+					colorChooser.setText("Nearest Graduation");
+					studentWindow.setNearestQuarterColor(new Color(Display.getCurrent(), colorChooser.open()));
+					resetStudentComposite(tabFolder);
+					studentTab.setControl(studentComposite);
+					studentWindow.redraw(studentComposite);
+				}
+			};
+		}
+		{
+			twoQColorAction = new Action("Two Quarters Away Color") {				public void run() {
+					
+					colorChooser = new ColorDialog(Display.getCurrent().getActiveShell());
+					colorChooser.setRGB(studentWindow.getNextQuarterColor().getRGB());
+					colorChooser.setText("Next Quarter Graduation");
+					studentWindow.setNextQuarterColor(new Color(Display.getCurrent(), colorChooser.open()));
+					resetStudentComposite(tabFolder);
+					studentTab.setControl(studentComposite);
+					studentWindow.redraw(studentComposite);
+				}
+			};
+		}
+		{
+			threeQColorAction = new Action("Three Quarters Away Color") {				public void run() {
+					colorChooser = new ColorDialog(Display.getCurrent().getActiveShell());
+					colorChooser.setRGB(studentWindow.getThreeQuarterColor().getRGB());
+					colorChooser.setText("Three Quarters to Graduation");
+					studentWindow.setThreeQuarterColor(new Color(Display.getCurrent(), colorChooser.open()));
+					resetStudentComposite(tabFolder);
+					studentTab.setControl(studentComposite);
+					studentWindow.redraw(studentComposite);
+				}
+			};
+		}
+		{
+			paidColorAction = new Action("Paid Color") {				public void run() {
+					colorChooser = new ColorDialog(Display.getCurrent().getActiveShell());
+					colorChooser.setRGB(studentWindow.getPaidColor().getRGB());
+					colorChooser.setText("Paid Color");
+					studentWindow.setPaidColor(new Color(Display.getCurrent(), colorChooser.open()));
+					resetStudentComposite(tabFolder);
+					studentTab.setControl(studentComposite);
+					studentWindow.redraw(studentComposite);
+				}
+			};
+		}
+		{
+			detachStudentAction = new Action("Detach") {				public void run() {
+
+					final Shell studentShell = new Shell();
+					studentShell.setLayout(new FillLayout());
+					studentShell.setBounds(0, 0, Display.getCurrent().getMonitors()[0].getBounds().width-10, Display.getCurrent().getBounds().height-50);
+					studentTab.dispose();
+					resetStudentComposite(studentShell);
+					studentWindow.redraw(studentComposite);
+					
+					studentShell.setText("Student Window");
+					studentShell.addShellListener(new ShellListener() {
+						public void shellActivated(ShellEvent e) {
+							
+						}
+						
+						public void shellIconified(ShellEvent e) {
+							
+						}
+						
+						public void shellDeiconified(ShellEvent e) {
+							
+						}
+						
+						public void shellClosed(ShellEvent e) {
+							studentTab = new CTabItem(tabFolder, SWT.NONE);
+							studentTab.setText("Students");
+
+							studentComposite = new Composite(tabFolder, SWT.NONE);
+							studentTab.setControl(studentComposite);
+							studentComposite.setLayout(new FillLayout());
+
+							studentWindow.redraw(studentComposite);
+							tabFolder.setSelection(studentTab);
+						}
+						
+						public void shellDeactivated(ShellEvent e) {
+							
+						}
+					});
+					
+					studentShell.open();
+					MenuManager menu = new MenuManager("Menu");
+					MenuManager fileMenu = new MenuManager("File");
+					menu.add(fileMenu);
+					Action reattachAction = new Action("Reattach") {
+						public void run() {
+							studentShell.close();
+						}
+					};
+					reattachAction.setAccelerator(SWT.CTRL | 'R');
+					fileMenu.add(reattachAction);
+					
+					studentShell.setMenuBar(menu.createMenuBar(studentShell));
+				}
+			};
+			detachStudentAction.setAccelerator(SWT.CTRL | 'D');
+		}
 	}
 
 	/**
@@ -240,6 +357,25 @@ public class FirstWindow extends ApplicationWindow {
 		fileMenu.add(newAction);
 		fileMenu.add(new Separator());
 		fileMenu.add(exitAction);
+		
+		MenuManager studentMenu = new MenuManager("Students");
+		menuManager.add(studentMenu);
+		studentMenu.add(detachStudentAction);
+		studentMenu.add(new Separator());
+		
+		MenuManager studentSettingsMenu = new MenuManager("Settings");
+		studentMenu.add(studentSettingsMenu);
+		
+		MenuManager colorSettingsMenu = new MenuManager("Colors");
+		studentSettingsMenu.add(colorSettingsMenu);
+		colorSettingsMenu.add(nearQColorAction);
+		colorSettingsMenu.add(twoQColorAction);
+		colorSettingsMenu.add(threeQColorAction);
+		colorSettingsMenu.add(paidColorAction);
+		
+		MenuManager courseMenu = new MenuManager("Courses & Instructors");
+		menuManager.add(courseMenu);
+		
 		return menuManager;
 	}
 
@@ -314,6 +450,14 @@ public class FirstWindow extends ApplicationWindow {
 			}
 		});
 	}
+	
+	private void resetStudentComposite(Composite control) {
+		
+		studentComposite.setVisible(false);
+		studentComposite.dispose();
+		studentComposite = new Composite(control, SWT.NONE);
+		studentComposite.setLayout(new FillLayout());
+	}
 
 	/**
 	 * Return the initial size of the window.
@@ -323,8 +467,7 @@ public class FirstWindow extends ApplicationWindow {
 		return new Point(Display.getCurrent().getBounds().width, Display.getCurrent().getBounds().height);
 	}
 
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> bc281ef7d99fbd3cce8c932b230c785f0b09c685
+
+

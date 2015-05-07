@@ -7,13 +7,13 @@ public class Instructor implements Serializable {
 
 	private String firstName;
 	private String lastName;
-	private ArrayList<Course> classesTaught;
+	private String middleInitial;
 	
-	public Instructor (String first, String last, ArrayList<Course> classes) {
+	public Instructor (String first, String last, String middle) {
 		
 		firstName = first;
 		lastName = last;
-		classesTaught = classes;
+		middleInitial = middle;
 	}
 	
 	public String toString() {
@@ -41,13 +41,13 @@ public class Instructor implements Serializable {
 		this.lastName = lastName;
 	}
 
-	public ArrayList<Course> getClassesTaught() {
+	public String getMiddleInitial() {
 		
-		return classesTaught;
+		return middleInitial;
 	}
 
-	public void setClassesTaught(ArrayList<Course> classesTaught) {
+	public void setMiddleInitial(String middle) {
 		
-		this.classesTaught = classesTaught;
+		middleInitial = middle;
 	}
 }

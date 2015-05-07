@@ -18,6 +18,7 @@ import model.Grade;
 import model.Instructor;
 import model.Quarter;
 import model.Student;
+import model.Which92;
 
 
 public class Scheduler implements Serializable {
@@ -192,7 +193,7 @@ public class Scheduler implements Serializable {
 					last[k] = (char)(random.nextInt(26) + 97);
 				}
 				
-				Student student = new Student(new String(first), new String(last), (20000000 + random.nextInt(100)), quarters[i], 2100-random.nextInt(3), "Benjamin@Netanyahu.com");
+				Student student = new Student(new String(first), new String(last), (20000000 + random.nextInt(100)), quarters[i], 2100-random.nextInt(3), "Benjamin@Netanyahu.com", Which92.FOUR92);
 				TreeMap<DayOfWeek, ArrayList<Integer>> times = new TreeMap<DayOfWeek, ArrayList<Integer>>();
 				
 				ArrayList<Integer> hours = new ArrayList<Integer>();
@@ -215,24 +216,9 @@ public class Scheduler implements Serializable {
 		
 		for (int i = 0; i < students.size(); i++) {
 			for (int j = 0; j < classes.size(); j++) {
-				Grade grade;
-				switch (random.nextInt(5)) {
-					case 0:
-						grade = Grade.A;
-						break;
-					case 1:
-						grade = Grade.B;
-						break;
-					case 2:
-						grade = Grade.C;
-						break;
-					case 3:
-						grade = Grade.D;
-						break;
-					default:
-						grade = Grade.F;
-						break;
-				}
+				
+				Grade grade = Grade.values()[random.nextInt(5)];
+
 				studse.get(i).addCourse(classes.get(j), grade);
 			}
 		}

@@ -19,9 +19,10 @@ public class Student implements Comparable<Student>, Serializable {
 	private int gradYear;
 	private String email;
 	private int studentID;
+	private Which92 which;
 	private int taHours = 0; // Hours that they have been scheduled for so far
 	
-	public Student(String first, String last, int id, Quarter gradQ, int gradY, String email) {
+	public Student(String first, String last, int id, Quarter gradQ, int gradY, String email, Which92 w92) {
 		
 		firstName = first;
 		lastName = last;
@@ -29,6 +30,7 @@ public class Student implements Comparable<Student>, Serializable {
 		gradQuarter = gradQ;
 		gradYear = gradY;
 		this.email = email;
+		which = w92;
 		
 		classesTaken = new HashMap<Course, Grade>();
 		hoursAvailable = new TreeMap<DayOfWeek, ArrayList<Integer>>();
@@ -191,4 +193,15 @@ public class Student implements Comparable<Student>, Serializable {
 		
 		this.taHours = taHours;
 	}
+	
+	public Which92 getWhich92() {
+		
+		return which;
+	}
+
+	public void setWhich92(Which92 which) {
+		
+		this.which = which;
+	}
+
 }
