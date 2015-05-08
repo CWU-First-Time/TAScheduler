@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -58,15 +59,24 @@ public class schedule {
 	
 	GridLayout layout;
 	Composite comp;
+	ScrolledComposite comps;
+
 	
 	public schedule(ScrolledComposite comps)
 	{
+		this.comps = comps;
+		
 		//GridLayout
 		layout = new GridLayout(SCHEDULE_COLUMNS,true);
 		
 		comp = new Composite(comps, SWT.NONE);
-		//comp.setBounds(0, 0, 2000, 2000);
 		comps.setContent(comp);
+		
+		//set Scrolled Composite attributes
+		comps.setAlwaysShowScrollBars(true);
+		comps.setExpandVertical(true);
+		comps.setExpandHorizontal(true);
+		
 		
 		layout.horizontalSpacing = 0;
 		
@@ -88,7 +98,7 @@ public class schedule {
 			
 			for(int j = 0; j < SCHEDULE_COLUMNS; j++)
 			{
-				final Text newTextField = new Text(comp, SWT.BORDER_DASH | SWT.MULTI | SWT.V_SCROLL);
+				final Text newTextField = new Text(comp, SWT.BORDER | SWT.MULTI);
 				final GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 				
 				newTextField.setLayoutData(gridData);
@@ -113,7 +123,11 @@ public class schedule {
 						gridData.heightHint = newTextField.getLineCount() * height;
 						newTextField.setLayoutData(gridData);
 						
+						//Refresh layout since text boxes got larger or smaller
 						comp.layout();
+						
+						//compute the size of the composite and set scroll bar
+						comps.setMinSize(comp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 					}
 				});
 				
