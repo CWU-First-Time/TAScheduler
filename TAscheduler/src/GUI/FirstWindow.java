@@ -306,7 +306,7 @@ public class FirstWindow extends ApplicationWindow {
 						}
 						
 						public void shellClosed(ShellEvent e) {
-							studentTab = new CTabItem(tabFolder, SWT.NONE);
+							studentTab = new CTabItem(tabFolder, SWT.NONE, 0);
 							studentTab.setText("Students");
 
 							studentComposite = new Composite(tabFolder, SWT.NONE);
