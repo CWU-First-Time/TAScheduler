@@ -118,36 +118,11 @@ public class FirstWindow extends ApplicationWindow {
 		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
 		scheduleTab.setText("Schedule");
 		
-		ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		scheduleTab.setControl(scrolledComposite);
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setExpandVertical(true);
-		
-		scrolledComposite.setAlwaysShowScrollBars(true);
-		
-		//scrolledComposite.setMinSize(400, 2000);
-		
-		
+
+	
 		schedule sch = new schedule(scrolledComposite);
-		
-		
-		
-		/*
-		//ScrollableComposite
-		//ScrolledComposite scrollComp = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.BORDER);
-		
-		ScrolledComposite scheduleTabComposite = new ScrolledComposite(tabFolder, SWT.None);
-		//scheduleTab.setControl(scheduleTabComposite);
-		
-		schedule sch = new schedule(scheduleTabComposite);
-		
-		//scrollComp.setContent(scheduleTabComposite);
-		//scrollComp.setMinSize(scheduleTabComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		//System.out.println("Height: " + scrollComp.getMinHeight() + "\nWidth: " + scrollComp.getMinWidth());
-		
-		scheduleTab.setControl(scheduleTabComposite);
-		*/
 		
 		
 		return container;
