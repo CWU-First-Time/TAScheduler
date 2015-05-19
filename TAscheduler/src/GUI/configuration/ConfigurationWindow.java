@@ -16,8 +16,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Spinner;
+<<<<<<< HEAD
 
 import GUI.Instructors.SWTResourceManager;
+=======
+//import org.eclipse.wb.swt.SWTResourceManager;
+
+>>>>>>> 064e8f3777ef50dd87ab0d9571c1dc221a96c658
 
 public class ConfigurationWindow extends Shell {
 	private Table table;

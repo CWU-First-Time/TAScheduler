@@ -50,7 +50,7 @@ public class schedule {
 	private List<String> contentsList;
 	private Text scheduleCells[];
 	
-	//Total of 144 cells
+	//Total of 150 cells
 	final int SCHEDULE_COLUMNS = 6;
 	final int SCHEDULE_ROWS =25;
 	
@@ -61,7 +61,11 @@ public class schedule {
 	Composite comp;
 	ScrolledComposite comps;
 
-	
+	/**
+	 * Constructor intializes the all the components of the schedule tab
+	 * 
+	 * @param comps - the composite object into all the components will be placed in
+	 */
 	public schedule(ScrolledComposite comps)
 	{
 		this.comps = comps;
@@ -83,11 +87,111 @@ public class schedule {
 		//Set the layout to the composite
 		comp.setLayout(layout);
 		
+		//Test button
+		/*
+		final Button btn = new Button(comp, SWT.PUSH | SWT.BORDER);
+		btn.setText("Test");
+		btn.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e)
+			{
+				addStudentToSchedule("Tony", "Tuesday", 9, 207);
+			}
+			
+		});
+		*/
+		
 		setupContentsV2();
 		setupSchedule(comp);
 		
 	}
 	
+	/**
+	 * Adds a student name to the schedule in a new line with the given day, the time and the
+	 * room number the student will TA for. 
+	 * 
+	 * @param studentName - String object that contains the name of the student to place in the schedule
+	 * @param day - String object that contains the week day in which the student will TA for.
+	 * @param time - Integer in which specifies the day of the time, times include 8, 9, 10, 11, 12, 1, 2 and 3.
+	 * @param room -Integer which specifies the room number. These include 203, 204, and 207. 
+	 */
+	public void addStudentToSchedule(String studentName, String day, int time, int room)
+	{
+		int index = 0;
+		String dayLwr = day.toLowerCase();
+		
+		
+		//The time determines the current row and its index
+		switch(time){
+			case 8:
+				index = 6;
+				break;
+			case 9:
+				index = 24;
+				break;
+			case 10:
+				index = 42;
+				break;
+			case 11:
+				index = 60;
+				break;
+			case 12:
+				index = 78;
+				break;
+			case 1:
+				index = 96;
+				break;
+			case 2:
+				index = 114;
+				break;
+			case 3:
+				index = 132;
+				break;	
+		}
+		
+		//The day determines the column 
+		if(dayLwr.equalsIgnoreCase("Monday"))
+			index += 1;
+		else if(dayLwr.equalsIgnoreCase("Tuesday"))
+			index += 2;
+		else if(dayLwr.equalsIgnoreCase("Wednesday"))
+			index += 3;
+		else if(dayLwr.equalsIgnoreCase("Thursday"))
+			index += 4;
+		else if(dayLwr.equalsIgnoreCase("Friday"))
+			index += 5;
+		
+		//The room determines the specific cell
+		switch(room){
+			case 203:
+				index += 0;
+				break;
+			case 204:
+				index += 6;
+				break;
+			case 207:
+				index += 12;
+				break;
+		}
+		
+		//Get cells current text
+		String cellCurrentText = scheduleCells[index].getText();
+		System.out.println("Before" + cellCurrentText);
+		
+		//Append to it the student name in a new line
+		cellCurrentText = cellCurrentText + studentName + "\n";
+		
+		System.out.println("After: " + cellCurrentText);
+		
+		//set the text to the cell
+		scheduleCells[index].setText(cellCurrentText);
+	
+	}
+	
+	/**
+	 * Places all the Text objects in the composite
+	 * 
+	 * @param comp -  the composite object onto which to place all the text objects onto.
+	 */
 	private void setupSchedule(final Composite comp)
 	{
 		//Initialize all cells of Text widgets
@@ -135,6 +239,9 @@ public class schedule {
 		}
 	}
 	
+	/**
+	 * Initializes all the string objects that will go into each cell of the schedule
+	 */
 	public void setupContentsV2()
 	{
 		contentsList = new ArrayList<String>();
@@ -187,58 +294,5 @@ public class schedule {
 		}
 		*/
 	}
-	
-	/*
-	public void setupContents()
-	{
-		contentsList = new ArrayList<String[]>();
-		String times[] = {"8:00", "9:00", "10:00", "11:00", "NOON", "1:00", "2:00", "3:00"};
-		int timesCounter = 0;
-		
-		String rooms[] = {"203", "204", "207"};
-		int roomsCounter = 0;
-		
-		int lastTimeRow = 0;
-		int thisRow = 0;
-		
-		for(int i = 0; i < 24; i++)
-		{
-			String str[] = new String[6];
-			thisRow = i;
-			
-			if(i % 3 == 0)
-			{
-				str[0] = times[timesCounter];
-				timesCounter++;
-				for(int j = 1; j < 6; j++)
-				{
-					str[j] = rooms[roomsCounter];
-				}
-				lastTimeRow = i;
-				roomsCounter++;
-			}
-			else if(thisRow - lastTimeRow == 1)
-			{
-				str[0] = "";
-				for(int j = 1; j < 6; j++)
-				{
-					str[j] = rooms[roomsCounter];
-				}
-				roomsCounter++;
-			}
-			else
-			{
-				str[0] = "";
-				for(int j = 1; j < 6; j++)
-				{
-					str[j] = rooms[roomsCounter];
-				
-				}
-				roomsCounter = 0;
-			}
-			contentsList.add(str);
-		}
-	
-	}
-	*/
+
 }
