@@ -2,8 +2,10 @@ package GUI.Instructors;
 
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 import model.Course;
+import model.Instructor;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -24,6 +26,7 @@ import scheduler.Scheduler;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 
 public class InstructorWindow extends Composite {
 	private Table instructorClassTable;
@@ -31,16 +34,17 @@ public class InstructorWindow extends Composite {
 	private Text classTextField;
 	private Scheduler scheduler;
 	private Text timeTextField;
+	private CourseCSVImporter csvImport;
 	/**
 	 * Create the composite.
 	 * @param parent
 	 * @param style
 	 */
-	public InstructorWindow(Composite parent, int style, Scheduler scheduler) {
+	public InstructorWindow(Composite parent, int style, Scheduler s) {
 		super(parent, SWT.BORDER);
+		csvImport = new CourseCSVImporter();
 		setLayout(null);
-		//this.scheduler = scheduler;
-		scheduler = new Scheduler();
+		scheduler = s;
 		instructorClassTable = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
 		instructorClassTable.setFont(SWTResourceManager.getFont("Segoe UI", 13, SWT.NORMAL));
 		instructorClassTable.setBounds(21, 29, 1054, 512);
@@ -51,25 +55,25 @@ public class InstructorWindow extends Composite {
 		tblclmnInstructor.setWidth(100);
 		tblclmnInstructor.setText("Instructor");
 		
-		ArrayList<Course> courses = scheduler.getCourses();
-		for(int i = 0; i <courses.size(); i++)
+		PriorityQueue<Course> courses = new PriorityQueue<Course>(scheduler.getCourses());
+		while (!courses.isEmpty())
 		{
-			TableColumn classes = new TableColumn(instructorClassTable,SWT.NONE);
+			TableColumn classes = new TableColumn(instructorClassTable, SWT.NONE);
 			classes.setWidth(100);
-			classes.setText("CS" + courses.get(i).getCourseNumber());
+			classes.setText("CS " + courses.peek().getCourseNumber() + ".00" + courses.remove().getSection());
 		
 		}
 		
 		
 		
-		List classList = new List(this, SWT.BORDER);
+		List classList = new List(this, SWT.BORDER | SWT.V_SCROLL);
 		classList.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
 		classList.setBounds(605, 558, 118, 131);
 		
-		
-		for(int i =0; i < courses.size();i++)
+		courses = new PriorityQueue<Course>(scheduler.getCourses());
+		while (!courses.isEmpty())
 		{
-			classList.add("CS "+ courses.get(i).getCourseNumber());
+			classList.add("CS "+ courses.peek().getCourseNumber() + ".00" + courses.remove().getSection());
 		}
 		
 		Label lblClass = new Label(this, SWT.CENTER);
@@ -149,6 +153,22 @@ public class InstructorWindow extends Composite {
 		Button removeInstructorBtn = new Button(this, SWT.NONE);
 		removeInstructorBtn.setBounds(429, 694, 109, 25);
 		removeInstructorBtn.setText("Remove Instructor");
+		
+		removeInstructorBtn.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				csvImport.importThings();
+				
+				for (Course course : csvImport.getCourses())
+					scheduler.addCourse(course);
+				
+				for (Instructor instructor : csvImport.getInstructors())
+					scheduler.addInstructor(instructor);
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
 		
 		Button removeClassBtn = new Button(this, SWT.NONE);
 		removeClassBtn.setBounds(623, 694, 85, 25);

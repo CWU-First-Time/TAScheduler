@@ -17,11 +17,11 @@ import model.Quarter;
 import model.Student;
 import model.Which92;
 
-public class StudentImporter {
+public class StudentCSVImporter {
 
 	private ArrayList<Student> students;
 
-	public StudentImporter() {
+	public StudentCSVImporter() {
 
 		students = new ArrayList<Student>();
 	}
@@ -60,6 +60,10 @@ public class StudentImporter {
 				String gradQuarter = "";
 				String whichTA = "";
 				String times = "";
+				String vb = "";
+				String preferredCourses = "";
+				//String grades = "";
+				//String classTaken = "";
 
 				try {
 
@@ -70,6 +74,12 @@ public class StudentImporter {
 					gradQuarter = reader.readLine();
 					whichTA = reader.readLine();
 					times = reader.readLine();
+					vb = reader.readLine();
+					reader.readLine();
+					preferredCourses = reader.readLine();
+					//grades = reader.readLine();
+					//classTaken = reader.readLine();
+					
 
 				} catch (IOException e1) {
 
@@ -118,14 +128,32 @@ public class StudentImporter {
 
 					timeMap.put(days[j], hours);
 				}
+				
+				strTok = new StringTokenizer(vb, ",");
+				strTok.nextToken();
+				vb = strTok.nextToken();
+				boolean vbExp = false;
+				if (vb.equals("TRUE") || vb.equals("true"))
+					vbExp = true;
+				
+				strTok = new StringTokenizer(preferredCourses, ",");
+				strTok.nextToken();
+				preferredCourses = "";
+				while (strTok.hasMoreTokens())
+					preferredCourses += strTok.nextToken() + "\n";
+				preferredCourses = preferredCourses.substring(1, preferredCourses.length()-2);
 
 				Quarter quarter = Quarter.getQuarter(gradQuarter);
 				Which92 which = Which92.getWhich92(whichTA);
 
 				Student stud = new Student(firstName, lastName, Integer.parseInt(sID), 
-						quarter, Integer.parseInt(gradYear), email, which);
+						quarter, Integer.parseInt(gradYear), email, which, vbExp, preferredCourses);
 				
 				stud.setHoursAvailable(timeMap);
+				
+				//strTok = new StringTokenizer(grade, ",");
+				
+				//stud.setClassesTaken(classesTaken);
 				students.add(stud);
 				
 			}

@@ -3,13 +3,16 @@ package model;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.eclipse.swt.graphics.Color;
+
 public class Instructor implements Serializable {
 
 	private String firstName;
 	private String lastName;
-	private String middleInitial;
-	
-	public Instructor (String first, String last, String middle) {
+	private char middleInitial;
+	private Color color;
+
+	public Instructor (String first, String last, char middle) {
 		
 		firstName = first;
 		lastName = last;
@@ -18,7 +21,7 @@ public class Instructor implements Serializable {
 	
 	public String toString() {
 		
-		return firstName + " " + lastName;
+		return firstName + "" + middleInitial + "" + lastName;
 	}
 
 	public String getFirstName() {
@@ -41,13 +44,23 @@ public class Instructor implements Serializable {
 		this.lastName = lastName;
 	}
 
-	public String getMiddleInitial() {
+	public char getMiddleInitial() {
 		
 		return middleInitial;
 	}
 
-	public void setMiddleInitial(String middle) {
+	public void setMiddleInitial(char middle) {
 		
 		middleInitial = middle;
+	}
+	
+	public Color getColor() {
+		
+		return color;
+	}
+
+	public void setColor(Color color) {
+		
+		this.color = color;
 	}
 }

@@ -8,17 +8,16 @@ import java.util.Map;
 public class Course implements Comparable<Course>, Serializable {
 
 	private Map<DayOfWeek, Integer> timeOffered;
-	private int credits = 0;
 	private int maxTAcount = 0;
 	private int courseNumber;
 	private int section;
 	private int roomNumber;
 	private Instructor instructor;
-	
-	public Course(Instructor inst, int sec, int courseNum, int cred, int room) {
+	private String title;
+
+	public Course(Instructor inst, int sec, int courseNum, int room) {
 		
 		instructor = inst;
-		credits = cred;
 		section = sec;
 		courseNumber = courseNum;
 		roomNumber = room;
@@ -28,17 +27,10 @@ public class Course implements Comparable<Course>, Serializable {
 	
 	public String toString() {
 		
-		String string = "Class: CS " + courseNumber + "\n" +
-						"Taught by: " + instructor + "\n";
-		
-		DayOfWeek[] days = DayOfWeek.values();
-		for (int i = 0; i < days.length; i++) {
-			string += days[i] + " times: "; 
-			for (int j = 0; j < days.length; j++)
-				string += timeOffered.get(days[i]) + ", ";
-			string += "\n";
-		}
-		return string;
+		return "CS " + courseNumber + ": " + title + "\n" +
+			   "Section " + section + "\n" +
+			   "Taught by: " + instructor + "\n" +
+			   "Room: " + roomNumber;
 	}
 	
 	public boolean equals(Course c) {
@@ -63,16 +55,6 @@ public class Course implements Comparable<Course>, Serializable {
 	public void setTimeOffered(Map<DayOfWeek, Integer> timeOffered) {
 		
 		this.timeOffered = timeOffered;
-	}
-
-	public int getCredits() {
-		
-		return credits;
-	}
-
-	public void setCredits(int credits) {
-		
-		this.credits = credits;
 	}
 
 	public int getMaxTAcount() {
@@ -116,10 +98,23 @@ public class Course implements Comparable<Course>, Serializable {
 	}
 
 	public int getRoomNumber() {
+		
 		return roomNumber;
 	}
 
 	public void setRoomNumber(int roomNumber) {
+		
 		this.roomNumber = roomNumber;
+	}
+	
+	
+	public String getTitle() {
+		
+		return title;
+	}
+
+	public void setTitle(String title) {
+		
+		this.title = title;
 	}
 }

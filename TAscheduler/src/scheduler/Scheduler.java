@@ -68,7 +68,7 @@ public class Scheduler implements Serializable {
 				while (!studentsTaken.isEmpty()) {
 				
 					Student next = studentsTaken.remove();
-					Set<Course> taken = next.getClassesTaken().keySet();
+					Set<Integer> taken = next.getClassesTaken().keySet();
 					
 					for (int i = 0; i < taken.size(); i++) {
 						if (taken.contains(c)) {
@@ -166,7 +166,7 @@ public class Scheduler implements Serializable {
 				times.put(days[k], j);
 			}
 
-			Course stuff = new Course(new Instructor("Jean", "Joseph", null), 1, 400 + j, 4, 200+j);
+			Course stuff = new Course(new Instructor("Jean", "Joseph", ' '), 1, 400 + j, 200+j);
 			stuff.setTimeOffered(times);
 			classes.add(stuff);
 		}
@@ -193,7 +193,7 @@ public class Scheduler implements Serializable {
 					last[k] = (char)(random.nextInt(26) + 97);
 				}
 				
-				Student student = new Student(new String(first), new String(last), (20000000 + random.nextInt(100)), quarters[i], 2100-random.nextInt(3), "Benjamin@Netanyahu.com", Which92.FOUR92);
+				Student student = new Student(new String(first), new String(last), (20000000 + random.nextInt(100)), quarters[i], 2100-random.nextInt(3), "Benjamin@Netanyahu.com", Which92.PAID, false, "CS 325");
 				TreeMap<DayOfWeek, ArrayList<Integer>> times = new TreeMap<DayOfWeek, ArrayList<Integer>>();
 				
 				ArrayList<Integer> hours = new ArrayList<Integer>();
@@ -217,9 +217,9 @@ public class Scheduler implements Serializable {
 		for (int i = 0; i < students.size(); i++) {
 			for (int j = 0; j < classes.size(); j++) {
 				
-				Grade grade = Grade.values()[random.nextInt(5)];
+				Grade grade = Grade.values()[j%5];
 
-				studse.get(i).addCourse(classes.get(j), grade);
+				studse.get(i).addCourse(classes.get(j).getCourseNumber(), grade);
 			}
 		}
 
@@ -230,6 +230,7 @@ public class Scheduler implements Serializable {
 		
 		for (int i = 0; i < classes.size(); i++)
 			courseQueue.add(classes.get(i));
+			
 		
 	}
 	
@@ -250,6 +251,10 @@ public class Scheduler implements Serializable {
 	
 	public boolean addCourse(Course c) {
 		
+		boolean[]temp = new boolean[studentColumnsGrayed.length+1];
+		for (int i = 0; i < studentColumnsGrayed.length; i++)
+			temp[i] = studentColumnsGrayed[i];
+		studentColumnsGrayed = temp;
 		return classes.add(c);
 	}
 	
@@ -265,6 +270,15 @@ public class Scheduler implements Serializable {
 	
 	public boolean removeCourse(Course c) {
 		
+		ArrayList<Boolean> grayed = new ArrayList<Boolean>();
+		for (int i = 0; i < studentColumnsGrayed.length; i++)
+			grayed.add(studentColumnsGrayed[i]);
+		
+		int index = classes.indexOf(c);
+		grayed.remove(index);
+		studentColumnsGrayed = new boolean[grayed.size()];	
+		for (int i = 0; i < grayed.size(); i++)
+			studentColumnsGrayed[i] = grayed.get(i);
 		return classes.remove(c);
 	}
 	

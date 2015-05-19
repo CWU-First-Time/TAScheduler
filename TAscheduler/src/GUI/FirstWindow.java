@@ -10,6 +10,8 @@ import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.graphics.Color;
@@ -56,9 +58,12 @@ public class FirstWindow extends ApplicationWindow {
 	private Action threeQColorAction;
 	private Action paidColorAction;
 	private Composite studentComposite;
+	private Composite classComposite;
 	private Action detachStudentAction;
+	private Action detachCourseAction;
 	private CTabFolder tabFolder;
 	private CTabItem studentTab;
+	private CTabItem courseTab;
 	
 	/**
 	 * @wbp.parser.constructor 
@@ -109,10 +114,10 @@ public class FirstWindow extends ApplicationWindow {
 
 		studentWindow = new StudentWindow(studentComposite, scheduler);
 
-		CTabItem courseTab = new CTabItem(tabFolder, SWT.NONE);
+		courseTab = new CTabItem(tabFolder, SWT.NONE);
 		courseTab.setText("Courses and Instructors");
 		
-		Composite classComposite = new InstructorWindow(tabFolder, SWT.NONE, scheduler);
+		classComposite = new InstructorWindow(tabFolder, SWT.NONE, scheduler);
 		courseTab.setControl(classComposite);
 
 		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
@@ -314,6 +319,63 @@ public class FirstWindow extends ApplicationWindow {
 			};
 			detachStudentAction.setAccelerator(SWT.CTRL | 'D');
 		}
+		{
+			detachCourseAction = new Action("Detach") {
+				public void run() {
+
+					final Shell courseShell = new Shell();
+					courseShell.setLayout(new FillLayout());
+					courseShell.setBounds(0, 0, Display.getCurrent().getMonitors()[0].getBounds().width-10, Display.getCurrent().getBounds().height-50);
+					courseTab.dispose();
+					classComposite.dispose();
+					classComposite = new InstructorWindow(courseShell, SWT.NONE, scheduler);
+					
+					courseShell.setText("Course Window");
+					courseShell.addShellListener(new ShellListener() {
+						public void shellActivated(ShellEvent e) {
+							
+						}
+						
+						public void shellIconified(ShellEvent e) {
+							
+						}
+						
+						public void shellDeiconified(ShellEvent e) {
+							
+						}
+						
+						public void shellClosed(ShellEvent e) {
+							courseTab = new CTabItem(tabFolder, SWT.NONE, 1);
+							courseTab.setText("Courses and Instructors");
+
+							classComposite = new InstructorWindow(tabFolder, SWT.NONE, scheduler);
+							courseTab.setControl(classComposite);
+
+							tabFolder.setSelection(studentTab);
+						}
+						
+						public void shellDeactivated(ShellEvent e) {
+							
+						}
+					});
+					
+					courseShell.open();
+					MenuManager menu = new MenuManager("Menu");
+					MenuManager fileMenu = new MenuManager("File");
+					menu.add(fileMenu);
+					Action reattachAction = new Action("Reattach") {
+						public void run() {
+							courseShell.close();
+						}
+					};
+					reattachAction.setAccelerator(SWT.SHIFT | 'R');
+					fileMenu.add(reattachAction);
+					
+					courseShell.setMenuBar(menu.createMenuBar(courseShell));
+				}
+			};
+			detachCourseAction.setAccelerator(SWT.SHIFT | 'D');
+		}
 	}
 
 	/**
@@ -336,21 +398,23 @@ public class FirstWindow extends ApplicationWindow {
 		MenuManager studentMenu = new MenuManager("Students");
 		menuManager.add(studentMenu);
 		studentMenu.add(detachStudentAction);
-		studentMenu.add(new Separator());
 		
-		MenuManager studentSettingsMenu = new MenuManager("Settings");
-		studentMenu.add(studentSettingsMenu);
+		MenuManager courseMenu = new MenuManager("Courses/Instructors");
+		menuManager.add(courseMenu);
+		courseMenu.add(detachCourseAction);
 		
+		MenuManager settingsMenu = new MenuManager("Settings");
+		MenuManager studentSettings = new MenuManager("Students");
+		settingsMenu.add(studentSettings);
 		MenuManager colorSettingsMenu = new MenuManager("Colors");
-		studentSettingsMenu.add(colorSettingsMenu);
+		
+		studentSettings.add(colorSettingsMenu);
 		colorSettingsMenu.add(nearQColorAction);
 		colorSettingsMenu.add(twoQColorAction);
 		colorSettingsMenu.add(threeQColorAction);
 		colorSettingsMenu.add(paidColorAction);
-		
-		MenuManager courseMenu = new MenuManager("Courses & Instructors");
-		menuManager.add(courseMenu);
-		
+		menuManager.add(settingsMenu);
+
 		return menuManager;
 	}
 

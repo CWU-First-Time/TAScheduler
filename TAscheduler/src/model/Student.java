@@ -14,15 +14,18 @@ public class Student implements Comparable<Student>, Serializable {
 	private Map<DayOfWeek, ArrayList<Integer>> hoursAvailable;
 	private String firstName;
 	private String lastName;
-	private HashMap<Course, Grade> classesTaken;
+	private HashMap<Integer, Grade> classesTaken;
 	private Quarter gradQuarter;
 	private int gradYear;
 	private String email;
 	private int studentID;
 	private Which92 which;
+	private boolean vbExp;
+	private String preferredCourses;
+
 	private int taHours = 0; // Hours that they have been scheduled for so far
 	
-	public Student(String first, String last, int id, Quarter gradQ, int gradY, String email, Which92 w92) {
+	public Student(String first, String last, int id, Quarter gradQ, int gradY, String email, Which92 w92, boolean vb, String prefCourse) {
 		
 		firstName = first;
 		lastName = last;
@@ -31,8 +34,10 @@ public class Student implements Comparable<Student>, Serializable {
 		gradYear = gradY;
 		this.email = email;
 		which = w92;
+		vbExp = vb;
+		preferredCourses = prefCourse;
 		
-		classesTaken = new HashMap<Course, Grade>();
+		classesTaken = new HashMap<Integer, Grade>();
 		hoursAvailable = new TreeMap<DayOfWeek, ArrayList<Integer>>();
 		
 	}
@@ -51,7 +56,7 @@ public class Student implements Comparable<Student>, Serializable {
 	}
 	
 	public boolean equals(Student other) {
-		System.out.println("Equal");
+
 		if (gradYear - other.getGradYear() != 0)
 			return false;
 		
@@ -67,21 +72,15 @@ public class Student implements Comparable<Student>, Serializable {
 	
 	public String toString() {
 		
-		String string = "Name: " + firstName + " " + lastName + "\n" +
-						"Student ID: " + studentID + "\n" +
-						"Graduates: " + gradQuarter + " " + gradYear + "\n";
-		
-		DayOfWeek[] days = DayOfWeek.values();
-		for (int i = 0; i < days.length; i++) 
-			string += days[i] + " availability: " + hoursAvailable.get(days[i]) + "\n";
-		
-		return string;
+		return "Name: " + firstName + " " + lastName + "\n" +
+	   		   "Student ID: " + studentID + "\n" +
+			   "Graduates: " + gradQuarter + " " + gradYear + "\n";
 		
 	}
 
-	public void addCourse(Course c, Grade grade) {
+	public void addCourse(Integer i, Grade grade) {
 	
-		classesTaken.put(c, grade);
+		classesTaken.put(i, grade);
 	}
 	
 	public void removeCourse(Course c) {
@@ -89,9 +88,9 @@ public class Student implements Comparable<Student>, Serializable {
 		classesTaken.remove(c);
 	}
 	
-	public Grade getGrade(Course c) {
+	public Grade getGrade(int courseNumber) {
 		
-		return classesTaken.get(c);
+		return classesTaken.get(courseNumber);
 	}
 	
 	public Map<DayOfWeek, ArrayList<Integer>> getHoursAvailable() {
@@ -124,12 +123,12 @@ public class Student implements Comparable<Student>, Serializable {
 		this.lastName = lastName;
 	}
 
-	public HashMap<Course, Grade> getClassesTaken() {
+	public HashMap<Integer, Grade> getClassesTaken() {
 		
 		return classesTaken;
 	}
 
-	public void setClassesTaken(HashMap<Course, Grade>  classesTaken) {
+	public void setClassesTaken(HashMap<Integer, Grade>  classesTaken) {
 		
 		this.classesTaken = classesTaken;
 	}
@@ -202,6 +201,22 @@ public class Student implements Comparable<Student>, Serializable {
 	public void setWhich92(Which92 which) {
 		
 		this.which = which;
+	}
+
+	public boolean hasVbExp() {
+		return vbExp;
+	}
+
+	public void setVbExp(boolean vbExp) {
+		this.vbExp = vbExp;
+	}
+	
+	public String getPreferredCourses() {
+		return preferredCourses;
+	}
+
+	public void setPreferredCourses(String preferredCourses) {
+		this.preferredCourses = preferredCourses;
 	}
 
 }

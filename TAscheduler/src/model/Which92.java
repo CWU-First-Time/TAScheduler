@@ -24,7 +24,7 @@ public enum Which92 {
 			return (value + 3) + "92";
 		
 		else
-			return "PAID";
+			return "Paid";
 	}
 	
 	public static Which92 getWhich92(String w) {

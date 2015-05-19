@@ -45,19 +45,20 @@ import scheduler.Scheduler;
 
 public class StudentWindow {
 
-	private final int nonCourseColumnCount = 6;
+	private final int nonCourseColumnCount = 7;
 	private Table studentTable;
 	private Table availabilityTable;
 	private Table gradeEntryTable;
 	private TableCursor tCursor;
 	private Map<TableItem, Student> studentMap;
-	private Course[] courseColumns;
+	private int[] courseColumns;
 	private Scheduler scheduler;
 	private Text nameInput;
 	private Text lastNameInput;
 	private Text idInput;
 	private Text emailInput;
 	private Text yearInput;
+	private Text prefCourses;
 	private Combo quarterComboSelect;
 	private Combo whichComboSelect;
 	private TableColumn[] studentTableColumns;
@@ -72,8 +73,10 @@ public class StudentWindow {
 	private ArrayList<Combo> gradeCombos;
 	private Button btnAddStudent;
 	private Button removeStudentButton;
+	private Button vbExp;
 	private DayOfWeek[] days = DayOfWeek.values();
 	private Composite container;
+	private HashMap<Integer, ArrayList<Course>> classes;
 	
 	/**
 	 * Create the application.
@@ -100,8 +103,16 @@ public class StudentWindow {
 	public void redraw(Composite parent) {
 		
 		gradeCombos = new ArrayList<Combo>();
-		courseColumns = new Course[scheduler.getCourses().size()];
+		courseColumns = new int[scheduler.getCourses().size()];
 		studentMap = new HashMap<TableItem, Student>();
+		classes = new HashMap<Integer, ArrayList<Course>>();
+		ArrayList<Course> courses = scheduler.getCourses();
+		for (Course course : courses) {
+			if (!classes.containsKey(course.getCourseNumber()))
+				classes.put(course.getCourseNumber(), new ArrayList<Course>());
+			
+			classes.get(course.getCourseNumber()).add(course);
+		}
 
 		final Shell shell = parent.getShell();
 		
@@ -167,6 +178,10 @@ public class StudentWindow {
 		final TableColumn whichTAColumn = new TableColumn(studentTable, SWT.NONE);
 		whichTAColumn.setWidth(100);
 		whichTAColumn.setText("392 / 492 / Paid");
+		
+		final TableColumn vbColumn = new TableColumn(studentTable, SWT.NONE);
+		vbColumn.setWidth(100);
+		vbColumn.setText("VB Experience?");
 
 		ScrolledComposite composite_1 = new ScrolledComposite(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
 		composite_1.setMinSize(460, 214);
@@ -214,7 +229,7 @@ public class StudentWindow {
 
 					studentMap.put(item, stud);
 
-					HashMap<Course, Grade> grades = stud.getClassesTaken();
+					HashMap<Integer, Grade> grades = stud.getClassesTaken();
 
 					for (int i = nonCourseColumnCount; i < studentTableColumns.length; i++) {
 
@@ -238,7 +253,7 @@ public class StudentWindow {
 				TableItem[] students = studentTable.getItems();
 
 				int columnIndex = 0;
-				for (int i = 0; i < studentTableColumns.length; i++) {
+				for (int i = nonCourseColumnCount; i < studentTableColumns.length; i++) {
 
 					if ((TableColumn) e.widget == studentTableColumns[i]) {
 						columnIndex = i;
@@ -247,21 +262,26 @@ public class StudentWindow {
 				}
 				
 				if (scheduler.getStudentColumnsGrayed()[columnIndex]) {
-					for (int i = 0; i < students.length; i++) 
-						
-						students[i].setText(columnIndex, studentMap.get(students[i]).getGrade(courseColumns[columnIndex-nonCourseColumnCount]).toString());
-					
-					if (studentTable.getSelectionCount() > 0) {
+					for (int i = 0; i < students.length; i++) {
 						
 						try {
-							gradeCombos.get(columnIndex-nonCourseColumnCount).select(studentMap.get(studentTable.getSelection()[0]).getGrade(courseColumns[columnIndex]).getValue());
-							
+							students[i].setText(columnIndex, studentMap.get(students[i]).getGrade(courseColumns[columnIndex-nonCourseColumnCount]).toString());
 						} catch (NullPointerException ex) {
-							
+
+							students[i].setText(columnIndex, "");
 						}
 					
-					}
+						if (studentTable.getSelectionCount() > 0) {
+						
+							try {
+								gradeCombos.get(columnIndex-nonCourseColumnCount).select(studentMap.get(studentTable.getSelection()[0]).getGrade(courseColumns[columnIndex-nonCourseColumnCount]).getValue());
+							
+							} catch (NullPointerException ex) {
+
+							}
 					
+						}
+					}
 					scheduler.getStudentColumnsGrayed()[columnIndex] = false;
 					
 				} else {
@@ -285,16 +305,16 @@ public class StudentWindow {
 		idColumn.addListener(SWT.Selection, columnSortListener);
 		gradColumn.addListener(SWT.Selection, columnSortListener);
 		emailColumn.addListener(SWT.Selection, columnSortListener);
+		whichTAColumn.addListener(SWT.Selection, columnSortListener);
+		vbColumn.addListener(SWT.Selection, columnSortListener);
 		
-		// Course columns
-		PriorityQueue<Course> classes = new PriorityQueue<Course>(
-				scheduler.getCourses());
-		while (!classes.isEmpty()) {
+		// Course columns	
+		PriorityQueue<Integer> numbers = new PriorityQueue<Integer>(classes.keySet());
+		while (!numbers.isEmpty()) {
 
-			final TableColumn classColumn = new TableColumn(studentTable,
-					SWT.NONE);
+			final TableColumn classColumn = new TableColumn(studentTable, SWT.NONE);
 			classColumn.setWidth(100);
-			classColumn.setText("CS " + classes.remove().getCourseNumber());
+			classColumn.setText("CS " + numbers.remove());
 
 			classColumn.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event e) {
@@ -321,16 +341,13 @@ public class StudentWindow {
 					}
 				}
 			});
-
 		}
-		
 		// Array of student items
 		TableItem[] items = studentTable.getItems();
 		
 		studentTableColumns = studentTable.getColumns();
-		if (scheduler.getStudentColumnsGrayed() == null) {
+		if (scheduler.getStudentColumnsGrayed() == null) 
 			scheduler.setStudentColumnsGrayed(new boolean[studentTable.getColumnCount()]);
-		}
 
 		// Adds students to the table and color codes them if they graduate
 		// within three quarters
@@ -341,22 +358,27 @@ public class StudentWindow {
 			String[] info = { stud.getLastName(), stud.getFirstName(),
 					String.valueOf(stud.getStudentID()),
 					stud.getGradQuarter() + " " + stud.getGradYear(),
-					stud.getEmail(), stud.getWhich92().toString()};
+					stud.getEmail(), stud.getWhich92().toString(), new Boolean(stud.hasVbExp()).toString()};
 			items[i].setText(info);
 			studentMap.put(items[i], stud);
 
-			HashMap<Course, Grade> grades = stud.getClassesTaken();
-			classes = new PriorityQueue<Course>(scheduler.getCourses());
-			for (int j = 0; j < studentTableColumns.length; j++) {
+			HashMap<Integer, Grade> grades = stud.getClassesTaken();
 
-				if (grades.containsKey(classes.peek())) {
+			int j = nonCourseColumnCount;
+			for (Integer number : classes.keySet()) {
 
-					if (!scheduler.getStudentColumnsGrayed()[j+nonCourseColumnCount]) 
-						items[i].setText(j + nonCourseColumnCount, grades.get(classes.remove()).toString());
-					else
-						classes.remove();
-				}
+				if (grades.containsKey(number)) {
+					if (!scheduler.getStudentColumnsGrayed()[j]) {
+						items[i].setText(j, grades.get(number).toString());
+						j++;
+						continue;
+					} else
+						items[i].setText(j, "");
+				} else
+					items[i].setText(j, "");
+				j++;
 			}
+			
 			
 			items[i].setBackground(getPriorityColor(stud));
 
@@ -408,8 +430,11 @@ public class StudentWindow {
 		items = availabilityTable.getItems();
 
 		// Adds times for availability table
-		for (int i = 0; i < 10; i++) {
-			items[i].setText(0, i + 8 + ":00");
+		for (int i = 8; i < 17; i++) {
+			if (i < 13)
+				items[i-8].setText(0, i + ":00");
+			else
+				items[i-8].setText(0, i-12 + ":00");
 		}
 
 		// Columns for availability table
@@ -436,10 +461,10 @@ public class StudentWindow {
 		lblName.setText("First Name:");
 
 		nameInput = new Text(addStudentComposite, SWT.BORDER);
-		nameInput.setBounds(75, 7, 170, 21);
+		nameInput.setBounds(75, 7, 190, 21);
 
 		lastNameInput = new Text(addStudentComposite, SWT.BORDER);
-		lastNameInput.setBounds(75, 34, 170, 21);
+		lastNameInput.setBounds(75, 34, 190, 21);
 
 		Label lblLastName = new Label(addStudentComposite, SWT.NONE);
 		lblLastName.setAlignment(SWT.RIGHT);
@@ -447,7 +472,7 @@ public class StudentWindow {
 		lblLastName.setText("Last Name:");
 
 		idInput = new Text(addStudentComposite, SWT.BORDER);
-		idInput.setBounds(75, 61, 170, 21);
+		idInput.setBounds(75, 61, 190, 21);
 
 		Label lblId = new Label(addStudentComposite, SWT.NONE);
 		lblId.setAlignment(SWT.RIGHT);
@@ -455,7 +480,7 @@ public class StudentWindow {
 		lblId.setText("ID:");
 
 		emailInput = new Text(addStudentComposite, SWT.BORDER);
-		emailInput.setBounds(75, 88, 170, 21);
+		emailInput.setBounds(75, 88, 190, 21);
 
 		quarterComboSelect = new Combo(addStudentComposite, SWT.READ_ONLY);
 		quarterComboSelect.setItems(new String[] { "Winter", "Spring", "Summer",
@@ -473,7 +498,7 @@ public class StudentWindow {
 		lblGraduation.setText("Grad Q:");
 
 		yearInput = new Text(addStudentComposite, SWT.BORDER);
-		yearInput.setBounds(75, 144, 170, 21);
+		yearInput.setBounds(75, 144, 190, 21);
 
 		Label lblYear = new Label(addStudentComposite, SWT.NONE);
 		lblYear.setAlignment(SWT.RIGHT);
@@ -482,15 +507,22 @@ public class StudentWindow {
 		
 		whichComboSelect = new Combo(addStudentComposite, SWT.READ_ONLY);
 		whichComboSelect.setItems(new String[] {"392", "492", "Paid"});
-		whichComboSelect.setBounds(200, 115, 45, 23);
+		whichComboSelect.setBounds(172, 115, 48, 23);
 		//whichComboSelect.setBounds(75, 170, 45, 23);
 		
 		Label whichLabel = new Label(addStudentComposite, SWT.NONE);
 		whichLabel.setAlignment(SWT.RIGHT);
-		whichLabel.setBounds(128, 119, 65, 15);
+		whichLabel.setBounds(105, 119, 65, 15);
 		// whichLabel.setBounds(5, 175, 65, 15);
 		// whichLabel.setText("392 / 492");
 		whichLabel.setText("?92:");
+		
+		Label vbLabel = new Label(addStudentComposite, SWT.NONE);
+		vbLabel.setBounds(225, 119, 20, 15);
+		vbLabel.setText("VB?");
+		
+		vbExp = new Button(addStudentComposite, SWT.CHECK);
+		vbExp.setBounds(250, 119, 25, 15);
 
 		btnAddStudent = new Button(addStudentComposite, SWT.NONE);
 		btnAddStudent.setBounds(0, 192, 123, 25);
@@ -500,7 +532,7 @@ public class StudentWindow {
 				
 				if (studentTable.getSelectionCount() > 0) {
 					
-					updateLowerWidgets(new Student("", "", 0, null, 0, "", null));
+					updateLowerWidgets(new Student("", "", 0, null, 0, "", null, false, ""));
 					studentTable.setSelection(-1);
 					btnAddStudent.setText("Add Student");
 					removeStudentButton.setVisible(false);
@@ -530,7 +562,7 @@ public class StudentWindow {
 					Quarter gradQ = Quarter.values()[quarterComboSelect.getSelectionIndex()];
 					Which92 which92 = Which92.values()[whichComboSelect.getSelectionIndex()];
 
-					Student newStudent = new Student(firstName, lastName, studentID, gradQ, year, email, which92);
+					Student newStudent = new Student(firstName, lastName, studentID, gradQ, year, email, which92, vbExp.getSelection(), prefCourses.getText());
 					scheduler.addStudent(newStudent);
 					
 					for (int i = 0; i < courseColumns.length; i++) {
@@ -547,7 +579,7 @@ public class StudentWindow {
 
 					String[] info = { lastName, firstName,
 							String.valueOf(studentID), gradQ + " " + year,
-							email, which92.toString()};
+							email, which92.toString(), };
 					newItem.setText(info);
 					newItem.setBackground(getPriorityColor(newStudent));
 					
@@ -592,7 +624,7 @@ public class StudentWindow {
 		});
 
 		Button updateStudentButton = new Button(addStudentComposite, SWT.NONE);
-		updateStudentButton.setBounds(142, 167, 116, 25);
+		updateStudentButton.setBounds(142, 167, 124, 25);
 		updateStudentButton.setText("Update");
 		updateStudentButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -620,6 +652,14 @@ public class StudentWindow {
 				inputs.add(whichComboSelect.getText());
 				selected.setWhich92(Which92.values()[whichComboSelect.getSelectionIndex()]);
 				
+				inputs.add(new Boolean(vbExp.getSelection()).toString());
+				selected.setVbExp(vbExp.getSelection());
+				
+				String pref = prefCourses.getText();
+				if (pref.toCharArray()[1] == '\n')
+					pref = pref.substring(2, pref.length());
+				selected.setPreferredCourses(pref);
+				
 				HashMap<DayOfWeek, ArrayList<Integer>> times = new HashMap<DayOfWeek, ArrayList<Integer>>();
 				for (int i = 1; i < availabilityTable.getColumnCount(); i++) {
 					
@@ -636,7 +676,7 @@ public class StudentWindow {
 				
 				for (int i = 0; i < gradeEntryTable.getColumnCount(); i++) {
 					
-					if (!scheduler.getStudentColumnsGrayed()[i+nonCourseColumnCount]) {
+					if (!scheduler.getStudentColumnsGrayed()[i]) {
 						
 						inputs.add(gradeCombos.get(i).getText());
 						
@@ -667,23 +707,27 @@ public class StudentWindow {
 			}
 		});
 
-		addStudentComposite.setBounds(availabilityTable.getBounds().width + 5, 0, 260, 239);
+		addStudentComposite.setBounds(availabilityTable.getBounds().width + 5, 0, 265, 239);
 		sashForm.setWeights(new int[] { 310, 225 });
+		
+		Label prefCLabel = new Label(lowerScroll, SWT.NONE);
+		prefCLabel.setText("Preferred Courses:");
+		
+		prefCourses = new Text(lowerScroll, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		
 		gradeEntryTable = new Table(lowerScroll, SWT.HIDE_SELECTION);
 		gradeEntryTable.setHeaderVisible(true);
 		gradeEntryTable.setLinesVisible(true);
 		final TableItem gradeList = new TableItem(gradeEntryTable, SWT.NONE);
-		
-		classes = new PriorityQueue<Course>(scheduler.getCourses());
+
 		int numClasses = 0;
 		
-		while (!classes.isEmpty()) {
+		for (Integer number : classes.keySet()) {
 			
 			TableColumn gradeColumn = new TableColumn(gradeEntryTable, SWT.NONE);
 			
-			courseColumns[numClasses++] = classes.peek();
-			gradeColumn.setText("CS " + classes.remove().getCourseNumber());
+			courseColumns[numClasses++] = number;
+			gradeColumn.setText("CS " + number);
 			gradeColumn.setWidth(75);
 
 		}
@@ -693,16 +737,17 @@ public class StudentWindow {
 			// Place a combo box in each column
 			TableEditor editor = new TableEditor(gradeEntryTable);
 			Combo grades = new Combo(gradeEntryTable, SWT.NONE);
-			grades.setItems(new String[] { "A", "B", "C",
-			"D", "F", "" });
+			grades.setItems(new String[] { "A", "B", "C", "D", "F", "" });
 			editor.grabHorizontal = true;
 			editor.setEditor(grades, gradeList, i);
 			gradeCombos.add(grades);
 			
 		}
 
-		gradeEntryTable.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 100, lowerScroll.getBounds().width - (addStudentComposite.getBounds().width + availabilityTable.getBounds().width) - 35, 60);
-	
+		gradeEntryTable.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 0, lowerScroll.getBounds().width - (addStudentComposite.getBounds().width + availabilityTable.getBounds().width) - 35, 65);
+		prefCourses.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 70, 200, 135);
+		prefCLabel.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 70, 100, 15);
+		
 		shell.addControlListener(new ControlListener() {
 			public void controlResized(ControlEvent e) {
 
@@ -740,25 +785,24 @@ public class StudentWindow {
 			
 			public void widgetSelected(SelectionEvent e) {
 				
-				StudentImporter importer = new StudentImporter();
+				StudentCSVImporter importer = new StudentCSVImporter();
 				importer.importStudents();
 				ArrayList<Student> newStudents = importer.getStudents();
 				
-				for (int i = 0; i < newStudents.size(); i++) {
-					
-					Student newStudent = newStudents.get(i);
-					if (studentMap.containsValue(newStudent))
+				for (Student s : newStudents) {
+
+					if (studentMap.containsValue(s))
 						continue;
 					
-					scheduler.addStudent(newStudent);
+					scheduler.addStudent(s);
 					TableItem newItem = new TableItem(studentTable, SWT.NONE, 0);
-					studentMap.put(newItem, newStudent);
+					studentMap.put(newItem, s);
 
-					String[] info = {newStudent.getLastName(), newStudent.getFirstName(),
-							String.valueOf(newStudent.getStudentID()), newStudent.getGradQuarter() + " " + newStudent.getGradYear(),
-							newStudent.getEmail(), newStudent.getWhich92().toString()};
+					String[] info = {s.getLastName(), s.getFirstName(),
+							String.valueOf(s.getStudentID()), s.getGradQuarter() + " " + s.getGradYear(),
+							s.getEmail(), s.getWhich92().toString(), new Boolean(s.hasVbExp()).toString()};
 					newItem.setText(info);
-					newItem.setBackground(getPriorityColor(newStudent));
+					newItem.setBackground(getPriorityColor(s));
 				}
 				
 			}
@@ -776,7 +820,7 @@ public class StudentWindow {
 				studentTable.remove(studentTable.getSelectionIndex());
 				studentMap.remove(item);
 				removeStudentButton.setVisible(false);
-				updateLowerWidgets(new Student("", "", 0, null, 0, "", null));
+				updateLowerWidgets(new Student("", "", 0, null, 0, "", null, false, ""));
 				
 				Set<TableItem> students = studentMap.keySet();
 				for (TableItem i : students) {
@@ -816,12 +860,11 @@ public class StudentWindow {
 		}
 		
 		// Update grades
-		HashMap<Course, Grade> grades = student.getClassesTaken();
-		PriorityQueue<Course> classes = new PriorityQueue<Course>(scheduler.getCourses());
+		HashMap<Integer, Grade> grades = student.getClassesTaken();
 		
 		for (int j = 0; j < gradeEntryTable.getColumnCount(); j++) {
 			
-			Course course = classes.remove();
+			Integer course = courseColumns[j];
 			if (grades.containsKey(course) && !scheduler.getStudentColumnsGrayed()[j+nonCourseColumnCount])
 				gradeCombos.get(j).select(grades.get(course).getValue());
 			else 
@@ -857,6 +900,10 @@ public class StudentWindow {
 			whichComboSelect.select(w.getValue());
 		else
 			whichComboSelect.deselectAll();
+		
+		vbExp.setSelection(student.hasVbExp());
+		
+		prefCourses.setText("\n" + student.getPreferredCourses());
 		
 	}
 	
