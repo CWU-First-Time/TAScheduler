@@ -19,6 +19,18 @@ public class Instructor implements Serializable {
 		middleInitial = middle;
 	}
 	
+	@Override
+	public boolean equals(Object i)
+	{
+		if (!(i instanceof Instructor))
+			return false;
+		
+		if (((Instructor)i).getFirstName().equals(firstName) && ((Instructor)i).getLastName().equals(lastName) && ((Instructor)i).getMiddleInitial() == middleInitial)
+			return true;
+		
+		return false;
+	}
+	
 	public String toString() {
 		
 		return firstName + "" + middleInitial + "" + lastName;

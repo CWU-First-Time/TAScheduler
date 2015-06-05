@@ -13,6 +13,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
+import model.Grade;
 import model.Quarter;
 import model.Student;
 import model.Which92;
@@ -53,7 +54,8 @@ public class StudentCSVImporter {
 					System.out.println(filePath + files[i] + " could not be opened.");
 				}
 
-				String name = "";
+				String firstName = "";
+				String lastName = "";
 				String sID = "";
 				String email = "";
 				String appQuarter = "";
@@ -62,12 +64,13 @@ public class StudentCSVImporter {
 				String times = "";
 				String vb = "";
 				String preferredCourses = "";
-				//String grades = "";
-				//String classTaken = "";
+				String grades = "";
+				String classTaken = "";
 
 				try {
 
-					name = reader.readLine();
+					firstName = reader.readLine();
+					lastName = reader.readLine();
 					sID = reader.readLine();
 					email = reader.readLine();
 					appQuarter = reader.readLine();
@@ -77,8 +80,8 @@ public class StudentCSVImporter {
 					vb = reader.readLine();
 					reader.readLine();
 					preferredCourses = reader.readLine();
-					//grades = reader.readLine();
-					//classTaken = reader.readLine();
+					grades = reader.readLine();
+					classTaken = reader.readLine();
 					
 
 				} catch (IOException e1) {
@@ -87,10 +90,13 @@ public class StudentCSVImporter {
 
 				}
 
-				StringTokenizer strTok = new StringTokenizer(name, ", ");
+				StringTokenizer strTok = new StringTokenizer(firstName, ",");
 				strTok.nextToken();
-				String firstName = strTok.nextToken();
-				String lastName = strTok.nextToken();
+				firstName = strTok.nextToken();
+				
+				strTok = new StringTokenizer(lastName, ",");
+				strTok.nextToken();
+				lastName = strTok.nextToken();
 
 				strTok = new StringTokenizer(sID, ",");
 				strTok.nextToken();
@@ -141,6 +147,7 @@ public class StudentCSVImporter {
 				preferredCourses = "";
 				while (strTok.hasMoreTokens())
 					preferredCourses += strTok.nextToken() + "\n";
+
 				preferredCourses = preferredCourses.substring(1, preferredCourses.length()-2);
 
 				Quarter quarter = Quarter.getQuarter(gradQuarter);
@@ -150,10 +157,27 @@ public class StudentCSVImporter {
 						quarter, Integer.parseInt(gradYear), email, which, vbExp, preferredCourses);
 				
 				stud.setHoursAvailable(timeMap);
+
+				StringTokenizer courseTok = new StringTokenizer(classTaken, ",");
+				strTok = new StringTokenizer(grades, ",", true);
+
+				HashMap<Integer, Grade> classesTaken = new HashMap<Integer, Grade>();
+				String grade = "";
+				String course = "";
 				
-				//strTok = new StringTokenizer(grade, ",");
-				
-				//stud.setClassesTaken(classesTaken);
+				while (courseTok.hasMoreTokens())
+				{
+					grade = strTok.nextToken();
+					course = courseTok.nextToken();
+
+					if (!grade.equals(","))
+					{
+						strTok.nextToken();
+						classesTaken.put(Integer.parseInt(course), Grade.value(grade));
+					}
+				}
+
+				stud.setClassesTaken(classesTaken);
 				students.add(stud);
 				
 			}

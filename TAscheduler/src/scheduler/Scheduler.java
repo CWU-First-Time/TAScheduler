@@ -157,79 +157,7 @@ public class Scheduler implements Serializable {
 		
 		possibleTAs = new TreeMap<Course, PriorityQueue<Student>>();
 		
-		for (int j = 0; j < 10; j++) {
-
-			TreeMap<DayOfWeek, Integer> times = new TreeMap<DayOfWeek, Integer>();
-
-			for (int k = 0; k < 7; k++) {
-				
-				times.put(days[k], j);
-			}
-
-			Course stuff = new Course(new Instructor("Jean", "Joseph", ' '), 1, 400 + j, 200+j);
-			stuff.setTimeOffered(times);
-			classes.add(stuff);
-		}
-		
-		for (int i = 0; i < classes.size(); i++)
-			possibleTAs.put(classes.get(i), new PriorityQueue<Student>());
-
-		Random random = new Random();
-		Quarter[] quarters = Quarter.values();	
-		
-		for (int i = 0; i < quarters.length; i++) {
-
-			for (int j = 0; j < 20; j++) {
-
-				char[] first = new char[random.nextInt(10) + 2];
-				for (int k = 0; k < first.length; k++) {
-					
-					first[k] = (char)(random.nextInt(26) + 97);
-				}
-				
-				char[] last = new char[random.nextInt(10) + 2];
-				for (int k = 0; k < last.length; k++) {
-					
-					last[k] = (char)(random.nextInt(26) + 97);
-				}
-				
-				Student student = new Student(new String(first), new String(last), (20000000 + random.nextInt(100)), quarters[i], 2100-random.nextInt(3), "Benjamin@Netanyahu.com", Which92.PAID, false, "CS 325");
-				TreeMap<DayOfWeek, ArrayList<Integer>> times = new TreeMap<DayOfWeek, ArrayList<Integer>>();
-				
-				ArrayList<Integer> hours = new ArrayList<Integer>();
-
-				for (int l = 0; l < 6; l++)
-					hours.add(random.nextInt(24));
-
-				for (int k = 0; k < days.length; k++) {
-
-					times.put(days[k], hours);
-				}
-
-				student.setHoursAvailable(times);
-				students.add(student);
-
-			}
-		}
-		
-		LinkedList<Student> studse = new LinkedList<Student>(students);
-		
-		for (int i = 0; i < students.size(); i++) {
-			for (int j = 0; j < classes.size(); j++) {
-				
-				Grade grade = Grade.values()[j%5];
-
-				studse.get(i).addCourse(classes.get(j).getCourseNumber(), grade);
-			}
-		}
-
-		PriorityQueue<Student> studs = new PriorityQueue<Student>(students);
-
-		while (!studs.isEmpty())
-			possibleCourses.put(studs.peek(), getPossibleCourses(studs.remove()));
-		
-		for (int i = 0; i < classes.size(); i++)
-			courseQueue.add(classes.get(i));
+	
 			
 		
 	}
@@ -258,9 +186,17 @@ public class Scheduler implements Serializable {
 		return classes.add(c);
 	}
 	
-	public boolean addInstructor(Instructor i) {
+	public boolean addInstructor(Instructor ins) {
 		
-		return instructors.add(i);
+		for (Instructor i : instructors)
+		{
+			if (i.equals(ins))
+			{
+				return false;
+			}
+		}
+		
+		return instructors.add(ins);
 	}
 	
 	public boolean removeStudent(Student stud) {

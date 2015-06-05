@@ -1,4 +1,4 @@
-package GUI.Instructors;
+package GUI.schedule;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -7,6 +7,8 @@ import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -17,28 +19,31 @@ import model.Student;
 import model.Which92;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 public class CourseCSVImporter {
 	
-	private HashSet<Course> courses;
+	private PriorityQueue<Course> courses;
 	private HashSet<Instructor> instructors;
 
 	public CourseCSVImporter() {
 
-		courses = new HashSet<Course>();
+		courses = new PriorityQueue<Course>();
 		instructors = new HashSet<Instructor>();
 	}
 
-	public ArrayList<Instructor> getInstructors() {
+	public HashSet<Instructor> getInstructors() {
 
-		return new ArrayList<Instructor>(instructors);
+		return new HashSet<Instructor>(instructors);
 	}
 	
-	public ArrayList<Course> getCourses() {
+	public PriorityQueue<Course> getCourses() {
 		
-		return new ArrayList<Course>(courses);
+		return courses;
 	}
 	
 	public void importThings() {
@@ -47,6 +52,7 @@ public class CourseCSVImporter {
 		fileChooser.setFilterExtensions(new String[] { "*.csv" });
 		String file = fileChooser.open();
 		String filePath = file.substring(0, file.lastIndexOf("\\") + 1);
+		Random random = new Random();
 		
 		if (file != null) {
 			
@@ -133,6 +139,7 @@ public class CourseCSVImporter {
 								if (st.hasMoreTokens())
 									middleInitial = st.nextToken();
 								Instructor instructor = new Instructor(firstName, lastName, middleInitial.charAt(0));
+								instructor.setColor(new Color(Display.getCurrent(), new RGB(random.nextInt(255), random.nextInt(255), random.nextInt(255))));
 								instructors.add(instructor);
 								
 								Course course = new Course(instructor, sec, courseN, roomN);

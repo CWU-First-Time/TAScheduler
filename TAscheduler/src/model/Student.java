@@ -22,6 +22,7 @@ public class Student implements Comparable<Student>, Serializable {
 	private Which92 which;
 	private boolean vbExp;
 	private String preferredCourses;
+	private int scheduledHours = 0;
 
 	private int taHours = 0; // Hours that they have been scheduled for so far
 	
@@ -217,6 +218,14 @@ public class Student implements Comparable<Student>, Serializable {
 
 	public void setPreferredCourses(String preferredCourses) {
 		this.preferredCourses = preferredCourses;
+	}
+
+	public int getScheduledHours() {
+		return scheduledHours;
+	}
+
+	public void setScheduledHours(int scheduledHours) {
+		this.scheduledHours = scheduledHours;
 	}
 
 }

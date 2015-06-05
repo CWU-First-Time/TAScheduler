@@ -27,10 +27,8 @@ public class Course implements Comparable<Course>, Serializable {
 	
 	public String toString() {
 		
-		return "CS " + courseNumber + ": " + title + "\n" +
-			   "Section " + section + "\n" +
-			   "Taught by: " + instructor + "\n" +
-			   "Room: " + roomNumber;
+		return "CS " + courseNumber + "." + String.format("%03d", section) + ": " + title;
+		
 	}
 	
 	public boolean equals(Course c) {

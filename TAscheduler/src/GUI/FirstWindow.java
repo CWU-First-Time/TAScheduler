@@ -36,7 +36,6 @@ import scheduler.Scheduler;
 
 import org.eclipse.swt.widgets.Button;
 
-import GUI.Instructors.InstructorWindow;
 import GUI.schedule.*;
 
 import GUI.student.StudentWindow;
@@ -58,12 +57,13 @@ public class FirstWindow extends ApplicationWindow {
 	private Action threeQColorAction;
 	private Action paidColorAction;
 	private Composite studentComposite;
-	private Composite classComposite;
 	private Action detachStudentAction;
 	private Action detachCourseAction;
 	private CTabFolder tabFolder;
 	private CTabItem studentTab;
 	private CTabItem courseTab;
+	private schedule sch;
+	private CTabItem scheduleTab;
 	
 	/**
 	 * @wbp.parser.constructor 
@@ -114,20 +114,14 @@ public class FirstWindow extends ApplicationWindow {
 
 		studentWindow = new StudentWindow(studentComposite, scheduler);
 
-		courseTab = new CTabItem(tabFolder, SWT.NONE);
-		courseTab.setText("Courses and Instructors");
-		
-		classComposite = new InstructorWindow(tabFolder, SWT.NONE, scheduler);
-		courseTab.setControl(classComposite);
-
-		CTabItem scheduleTab = new CTabItem(tabFolder, SWT.NONE);
+		scheduleTab = new CTabItem(tabFolder, SWT.NONE);
 		scheduleTab.setText("Schedule");
 		
 		ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		scheduleTab.setControl(scrolledComposite);
-
+		scrolledComposite.setLayout(new FillLayout());
 	
-		schedule sch = new schedule(scrolledComposite);
+		sch = new schedule(scrolledComposite, scheduler);
 		
 		
 		return container;
@@ -220,7 +214,7 @@ public class FirstWindow extends ApplicationWindow {
 					studentWindow.setNearestQuarterColor(new Color(Display.getCurrent(), colorChooser.open()));
 					resetStudentComposite(tabFolder);
 					studentTab.setControl(studentComposite);
-					studentWindow.redraw(studentComposite);
+					studentWindow.redraw(studentComposite, scheduler);
 				}
 			};
 		}
@@ -233,7 +227,7 @@ public class FirstWindow extends ApplicationWindow {
 					studentWindow.setNextQuarterColor(new Color(Display.getCurrent(), colorChooser.open()));
 					resetStudentComposite(tabFolder);
 					studentTab.setControl(studentComposite);
-					studentWindow.redraw(studentComposite);
+					studentWindow.redraw(studentComposite, scheduler);
 				}
 			};
 		}
@@ -245,7 +239,7 @@ public class FirstWindow extends ApplicationWindow {
 					studentWindow.setThreeQuarterColor(new Color(Display.getCurrent(), colorChooser.open()));
 					resetStudentComposite(tabFolder);
 					studentTab.setControl(studentComposite);
-					studentWindow.redraw(studentComposite);
+					studentWindow.redraw(studentComposite, scheduler);
 				}
 			};
 		}
@@ -257,7 +251,7 @@ public class FirstWindow extends ApplicationWindow {
 					studentWindow.setPaidColor(new Color(Display.getCurrent(), colorChooser.open()));
 					resetStudentComposite(tabFolder);
 					studentTab.setControl(studentComposite);
-					studentWindow.redraw(studentComposite);
+					studentWindow.redraw(studentComposite, scheduler);
 				}
 			};
 		}
@@ -269,7 +263,7 @@ public class FirstWindow extends ApplicationWindow {
 					studentShell.setBounds(0, 0, Display.getCurrent().getMonitors()[0].getBounds().width-10, Display.getCurrent().getBounds().height-50);
 					studentTab.dispose();
 					resetStudentComposite(studentShell);
-					studentWindow.redraw(studentComposite);
+					studentWindow.redraw(studentComposite, scheduler);
 					
 					studentShell.setText("Student Window");
 					studentShell.addShellListener(new ShellListener() {
@@ -293,7 +287,7 @@ public class FirstWindow extends ApplicationWindow {
 							studentTab.setControl(studentComposite);
 							studentComposite.setLayout(new FillLayout());
 
-							studentWindow.redraw(studentComposite);
+							studentWindow.redraw(studentComposite, scheduler);
 							tabFolder.setSelection(studentTab);
 						}
 						
@@ -326,9 +320,11 @@ public class FirstWindow extends ApplicationWindow {
 					final Shell courseShell = new Shell();
 					courseShell.setLayout(new FillLayout());
 					courseShell.setBounds(0, 0, Display.getCurrent().getMonitors()[0].getBounds().width-10, Display.getCurrent().getBounds().height-50);
-					courseTab.dispose();
-					classComposite.dispose();
-					classComposite = new InstructorWindow(courseShell, SWT.NONE, scheduler);
+					scheduleTab.dispose();
+					ScrolledComposite scrolledComposite = new ScrolledComposite(courseShell, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+					scrolledComposite.setLayout(new FillLayout());
+				
+					sch = new schedule(scrolledComposite, scheduler);
 					
 					courseShell.setText("Course Window");
 					courseShell.addShellListener(new ShellListener() {
@@ -345,11 +341,15 @@ public class FirstWindow extends ApplicationWindow {
 						}
 						
 						public void shellClosed(ShellEvent e) {
-							courseTab = new CTabItem(tabFolder, SWT.NONE, 1);
-							courseTab.setText("Courses and Instructors");
+							scheduleTab = new CTabItem(tabFolder, SWT.NONE, 1);
+							scheduleTab.setText("Courses and Instructors");
 
-							classComposite = new InstructorWindow(tabFolder, SWT.NONE, scheduler);
-							courseTab.setControl(classComposite);
+							ScrolledComposite scrolledComposite = new ScrolledComposite(tabFolder, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+							scheduleTab.setControl(scrolledComposite);
+							scrolledComposite.setLayout(new FillLayout());
+						
+							sch = new schedule(scrolledComposite, scheduler);
+							scheduleTab.setControl(scrolledComposite);
 
 							tabFolder.setSelection(studentTab);
 						}

@@ -1,8 +1,11 @@
 package GUI.student;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,12 +43,14 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import com.ibm.icu.util.StringTokenizer;
+
 import GUI.DisableSortPrompt;
 import scheduler.Scheduler;
 
 public class StudentWindow {
 
-	private final int nonCourseColumnCount = 7;
+	private final int nonCourseColumnCount = 8;
 	private Table studentTable;
 	private Table availabilityTable;
 	private Table gradeEntryTable;
@@ -77,6 +82,7 @@ public class StudentWindow {
 	private DayOfWeek[] days = DayOfWeek.values();
 	private Composite container;
 	private HashMap<Integer, ArrayList<Course>> classes;
+	private Combo hoursCombo;
 	
 	/**
 	 * Create the application.
@@ -96,14 +102,14 @@ public class StudentWindow {
 		paidColor = new Color(display, 237, 128, 212);
 		container = parent;
 		
-		redraw(parent);
+		redraw(parent, scheduler);
 	
 	}
 	
-	public void redraw(Composite parent) {
+	public void redraw(Composite parent, Scheduler s) {
 		
 		gradeCombos = new ArrayList<Combo>();
-		courseColumns = new int[scheduler.getCourses().size()];
+		scheduler = s;
 		studentMap = new HashMap<TableItem, Student>();
 		classes = new HashMap<Integer, ArrayList<Course>>();
 		ArrayList<Course> courses = scheduler.getCourses();
@@ -182,6 +188,10 @@ public class StudentWindow {
 		final TableColumn vbColumn = new TableColumn(studentTable, SWT.NONE);
 		vbColumn.setWidth(100);
 		vbColumn.setText("VB Experience?");
+		
+		final TableColumn hoursColumn = new TableColumn(studentTable, SWT.NONE);
+		hoursColumn.setWidth(100);
+		hoursColumn.setText("Hours");
 
 		ScrolledComposite composite_1 = new ScrolledComposite(sashForm, SWT.H_SCROLL | SWT.V_SCROLL);
 		composite_1.setMinSize(460, 214);
@@ -307,40 +317,60 @@ public class StudentWindow {
 		emailColumn.addListener(SWT.Selection, columnSortListener);
 		whichTAColumn.addListener(SWT.Selection, columnSortListener);
 		vbColumn.addListener(SWT.Selection, columnSortListener);
+		hoursColumn.addListener(SWT.Selection, columnSortListener);
 		
 		// Course columns	
-		PriorityQueue<Integer> numbers = new PriorityQueue<Integer>(classes.keySet());
-		while (!numbers.isEmpty()) {
+		BufferedReader reader = null;
+		String numbers = "";
 
-			final TableColumn classColumn = new TableColumn(studentTable, SWT.NONE);
-			classColumn.setWidth(100);
-			classColumn.setText("CS " + numbers.remove());
+		try {
 
-			classColumn.addListener(SWT.Selection, new Listener() {
-				public void handleEvent(Event e) {
+			reader = new BufferedReader(new FileReader("src\\resources\\Courses.csv"));
+			numbers = reader.readLine();
+
+		} catch (Exception ex) {
+			
+		}
+		
+		StringTokenizer strTok = new StringTokenizer(numbers, ",");
+		courseColumns = new int[strTok.countTokens()];
+		
+		while (strTok.hasMoreTokens()) {
+
+			numbers = strTok.nextToken();
+			if (!numbers.equals(","))
+			{
+				final TableColumn classColumn = new TableColumn(studentTable, SWT.NONE);
+				classColumn.setWidth(100);
+				classColumn.setText("CS " + numbers);
+				classes.put(Integer.parseInt(numbers), null);
+				
+				classColumn.addListener(SWT.Selection, new Listener() {
+					public void handleEvent(Event e) {
 					
-					DisableSortPrompt prompt = new DisableSortPrompt(display.getActiveShell(), classColumn.getText());
-					prompt.open();
+						DisableSortPrompt prompt = new DisableSortPrompt(display.getActiveShell(), classColumn.getText());
+						prompt.open();
 					
-					while(!prompt.isDisposed()) {
-						if (!display.readAndDispatch()) {
-							display.sleep();
+						while(!prompt.isDisposed()) {
+							if (!display.readAndDispatch()) {
+								display.sleep();
+							}
+						}
+					
+						boolean sort = prompt.getSort();
+
+						if (sort) {
+						
+							columnSortListener.handleEvent(e);
+						
+						} else {
+						
+							columnGrayListener.handleEvent(e);
+						
 						}
 					}
-					
-					boolean sort = prompt.getSort();
-
-					if (sort) {
-						
-						columnSortListener.handleEvent(e);
-						
-					} else {
-						
-						columnGrayListener.handleEvent(e);
-						
-					}
-				}
-			});
+				});
+			}
 		}
 		// Array of student items
 		TableItem[] items = studentTable.getItems();
@@ -358,7 +388,7 @@ public class StudentWindow {
 			String[] info = { stud.getLastName(), stud.getFirstName(),
 					String.valueOf(stud.getStudentID()),
 					stud.getGradQuarter() + " " + stud.getGradYear(),
-					stud.getEmail(), stud.getWhich92().toString(), new Boolean(stud.hasVbExp()).toString()};
+					stud.getEmail(), stud.getWhich92().toString(), new Boolean(stud.hasVbExp()).toString(), "0"};
 			items[i].setText(info);
 			studentMap.put(items[i], stud);
 
@@ -366,11 +396,12 @@ public class StudentWindow {
 
 			int j = nonCourseColumnCount;
 			for (Integer number : classes.keySet()) {
-
+				System.out.println(number);
 				if (grades.containsKey(number)) {
 					if (!scheduler.getStudentColumnsGrayed()[j]) {
 						items[i].setText(j, grades.get(number).toString());
 						j++;
+
 						continue;
 					} else
 						items[i].setText(j, "");
@@ -563,6 +594,7 @@ public class StudentWindow {
 					Which92 which92 = Which92.values()[whichComboSelect.getSelectionIndex()];
 
 					Student newStudent = new Student(firstName, lastName, studentID, gradQ, year, email, which92, vbExp.getSelection(), prefCourses.getText());
+					newStudent.setScheduledHours(hoursCombo.getSelectionIndex());
 					scheduler.addStudent(newStudent);
 					
 					for (int i = 0; i < courseColumns.length; i++) {
@@ -577,9 +609,8 @@ public class StudentWindow {
 					TableItem newItem = new TableItem(studentTable, SWT.NONE, 0);
 					studentMap.put(newItem, newStudent);
 
-					String[] info = { lastName, firstName,
-							String.valueOf(studentID), gradQ + " " + year,
-							email, which92.toString(), };
+					String[] info = { lastName, firstName, studentID + "", gradQ + " " + year,
+							email, which92.toString(), new Boolean(vbExp.getSelection()).toString(), hoursCombo.getSelectionIndex() + ""};
 					newItem.setText(info);
 					newItem.setBackground(getPriorityColor(newStudent));
 					
@@ -660,6 +691,9 @@ public class StudentWindow {
 					pref = pref.substring(2, pref.length());
 				selected.setPreferredCourses(pref);
 				
+				inputs.add(hoursCombo.getSelectionIndex() + "");
+				selected.setScheduledHours(hoursCombo.getSelectionIndex());
+				
 				HashMap<DayOfWeek, ArrayList<Integer>> times = new HashMap<DayOfWeek, ArrayList<Integer>>();
 				for (int i = 1; i < availabilityTable.getColumnCount(); i++) {
 					
@@ -714,6 +748,7 @@ public class StudentWindow {
 		prefCLabel.setText("Preferred Courses:");
 		
 		prefCourses = new Text(lowerScroll, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		hoursCombo = new Combo(lowerScroll, SWT.NONE);
 		
 		gradeEntryTable = new Table(lowerScroll, SWT.HIDE_SELECTION);
 		gradeEntryTable.setHeaderVisible(true);
@@ -722,10 +757,13 @@ public class StudentWindow {
 
 		int numClasses = 0;
 		
-		for (Integer number : classes.keySet()) {
+		PriorityQueue orderedClasses = new PriorityQueue<Integer>(classes.keySet());
+		
+		while (!orderedClasses.isEmpty()) {
 			
 			TableColumn gradeColumn = new TableColumn(gradeEntryTable, SWT.NONE);
 			
+			Integer number = (Integer)orderedClasses.remove();
 			courseColumns[numClasses++] = number;
 			gradeColumn.setText("CS " + number);
 			gradeColumn.setWidth(75);
@@ -737,7 +775,13 @@ public class StudentWindow {
 			// Place a combo box in each column
 			TableEditor editor = new TableEditor(gradeEntryTable);
 			Combo grades = new Combo(gradeEntryTable, SWT.NONE);
-			grades.setItems(new String[] { "A", "B", "C", "D", "F", "" });
+			String[] stringArray = new String[Grade.values().length + 1];
+			int j = 0;
+			for (; j < stringArray.length - 1; j++)
+				stringArray[j] = Grade.values()[j].toString();
+			
+			stringArray[j] = "";
+			grades.setItems(stringArray);
 			editor.grabHorizontal = true;
 			editor.setEditor(grades, gradeList, i);
 			gradeCombos.add(grades);
@@ -747,6 +791,12 @@ public class StudentWindow {
 		gradeEntryTable.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 0, lowerScroll.getBounds().width - (addStudentComposite.getBounds().width + availabilityTable.getBounds().width) - 35, 65);
 		prefCourses.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 70, 200, 135);
 		prefCLabel.setBounds(addStudentComposite.getBounds().width + availabilityTable.getBounds().width + 30, 70, 100, 15);
+		hoursCombo.setBounds(addStudentComposite.getBounds().width + prefCourses.getBounds().width + availabilityTable.getBounds().width + 40, 100, 100, 50);
+		hoursCombo.setItems(new String[]{"0", "1", "2", "3", "4", "5", "6"});
+		hoursCombo.select(0);
+		Label hourLabel = new Label(lowerScroll, SWT.NONE);
+		hourLabel.setText("Scheduled Hours:");
+		hourLabel.setBounds(addStudentComposite.getBounds().width + prefCourses.getBounds().width + availabilityTable.getBounds().width + 40, 80, 250, 50);
 		
 		shell.addControlListener(new ControlListener() {
 			public void controlResized(ControlEvent e) {
@@ -800,9 +850,19 @@ public class StudentWindow {
 
 					String[] info = {s.getLastName(), s.getFirstName(),
 							String.valueOf(s.getStudentID()), s.getGradQuarter() + " " + s.getGradYear(),
-							s.getEmail(), s.getWhich92().toString(), new Boolean(s.hasVbExp()).toString()};
+							s.getEmail(), s.getWhich92().toString(), new Boolean(s.hasVbExp()).toString(), s.getScheduledHours() + ""};
 					newItem.setText(info);
 					newItem.setBackground(getPriorityColor(s));
+					
+					HashMap<Integer, Grade> grades = s.getClassesTaken();
+					System.out.println(grades);
+					for (int j = 0; j < gradeEntryTable.getColumnCount(); j++) {
+						
+						Integer course = courseColumns[j];
+						if (grades.containsKey(course) && !scheduler.getStudentColumnsGrayed()[j+nonCourseColumnCount])
+							newItem.setText(nonCourseColumnCount + j, grades.get(course).toString());
+
+					}
 				}
 				
 			}
@@ -904,6 +964,8 @@ public class StudentWindow {
 		vbExp.setSelection(student.hasVbExp());
 		
 		prefCourses.setText("\n" + student.getPreferredCourses());
+		
+		hoursCombo.select(student.getScheduledHours());
 		
 	}
 	

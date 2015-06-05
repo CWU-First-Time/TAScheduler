@@ -8,7 +8,7 @@
  * Contributors:
  *    Google, Inc. - initial API and implementation
  *******************************************************************************/
-package GUI.configuration;
+package GUI.schedule;
 
 import java.io.FileInputStream;
 import java.io.IOException;
